@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NOIR | Arquivo de Alta Perfumaria</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Background Glow & Grid -->
+  <div class="ambient-glow"></div>
+
+  <!-- Header / Navigation -->
+  <header class="navbar">
+    <div class="logo">
+      <span class="logo-accent">✦</span> NOIR <span>PARFUMS</span>
+    </div>
+    <div class="search-container">
+      <input type="text" id="searchInput" placeholder="Buscar por nome, marca ou nota olfativa..." />
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <p class="hero-tagline">CURADORIA DE ALTA PERFUMARIA</p>
+    <h1>Encontre sua assinatura olfativa</h1>
+    <p class="hero-desc">Selecione suas preferências abaixo para calcular a afinidade aromática em tempo real.</p>
+  </section>
+
+  <!-- Match Engine / Filters -->
+  <section class="filter-panel">
+    <div class="filter-header">
+      <h2>✦ Motor de Compatibilidade Olfativa</h2>
+      <button id="resetFiltersBtn" class="btn-ghost">Limpar Filtros</button>
+    </div>
+
+    <div class="filter-grid">
+      <!-- Gênero -->
+      <div class="filter-group">
+        <label>Gênero</label>
+        <div class="chip-group" data-filter="gender">
+          <button class="chip" data-value="Masculino">Masculino</button>
+          <button class="chip" data-value="Feminino">Feminino</button>
+          <button class="chip" data-value="Unissex">Unissex</button>
+        </div>
+      </div>
+
+      <!-- Família Olfativa -->
+      <div class="filter-group">
+        <label>Família Olfativa Principal</label>
+        <div class="chip-group" data-filter="family">
+          <button class="chip" data-value="Amadeirado">Amadeirado</button>
+          <button class="chip" data-value="Oriental/Âmbar">Oriental / Âmbar</button>
+          <button class="chip" data-value="Floral">Floral</button>
+          <button class="chip" data-value="Gourmand">Gourmand</button>
+          <button class="chip" data-value="Cítrico/Fresco">Cítrico / Fresco</button>
+          <button class="chip" data-value="Aquático/Aromático">Aquático / Aromático</button>
+        </div>
+      </div>
+
+      <!-- Ocasião / Clima -->
+      <div class="filter-group">
+        <label>Ocasião de Uso</label>
+        <div class="chip-group" data-filter="occasion">
+          <button class="chip" data-value="Noite / Balada">Noite / Balada</button>
+          <button class="chip" data-value="Encontro / Romance">Encontro / Romance</button>
+          <button class="chip" data-value="Dia a Dia / Trabalho">Dia a Dia / Trabalho</button>
+          <button class="chip" data-value="Clima Frio">Clima Frio</button>
+          <button class="chip" data-value="Verão / Calor">Verão / Calor</button>
+          <button class="chip" data-value="Formal / Gala">Formal / Gala</button>
+        </div>
+      </div>
+
+      <!-- Intensidade / Projeção -->
+      <div class="filter-group">
+        <label>Intensidade / Projeção</label>
+        <div class="chip-group" data-filter="intensity">
+          <button class="chip" data-value="Moderada">Discreta / Elegante</button>
+          <button class="chip" data-value="Intensa">Marcante</button>
+          <button class="chip" data-value="Bomba">Projeção Extrema</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sort-bar">
+      <span id="resultsCount">50 fragrâncias catalogadas</span>
+      <div class="sort-select-wrapper">
+        <label for="sortSelect">Ordenar por:</label>
+        <select id="sortSelect">
+          <option value="match">Maior Afinidade (Match %)</option>
+          <option value="salesRank">Ranking de Vendas Mundial</option>
+          <option value="rating">Melhor Avaliação da Crítica</option>
+          <option value="name">Nome (A-Z)</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- Perfume Catalog Grid -->
+  <main class="catalog-grid" id="catalogGrid">
+    <!-- Cards renderizados via JavaScript -->
+  </main>
+
+  <!-- Modal Detalhes do Perfume -->
+  <div class="modal-overlay" id="perfumeModal">
+    <div class="modal-content">
+      <button class="modal-close" id="modalCloseBtn">&times;</button>
+      <div class="modal-body" id="modalBody">
+        <!-- Detalhes injetados dinamicamente -->
+      </div>
+    </div>
+  </div>
+
+  <script src="perfumes.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
