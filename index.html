@@ -3,45 +3,107 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NOIR | Arquivo de Alta Perfumaria</title>
+  <title>NOIR PARFUMS | O Maior Arquivo de Perfumes de Luxo</title>
+  <meta name="description" content="Catálogo interativo com 300 perfumes importados e nacionais com pirâmide olfativa, notas e busca inteligente em tempo real." />
+  
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- Background Glow & Grid -->
+  <!-- Ambient Glow Effects -->
   <div class="ambient-glow"></div>
+  <div class="ambient-glow-secondary"></div>
 
-  <!-- Header / Navigation -->
+  <!-- Header / Top Bar -->
   <header class="navbar">
-    <div class="logo">
-      <span class="logo-accent">✦</span> NOIR <span>PARFUMS</span>
+    <div class="nav-brand" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+      <span class="logo-symbol">✦</span>
+      <div class="logo-text-group">
+        <span class="logo-title">NOIR</span>
+        <span class="logo-subtitle">PARFUMS VAULT</span>
+      </div>
     </div>
-    <div class="search-container">
-      <input type="text" id="searchInput" placeholder="Buscar por nome, marca ou nota olfativa..." />
+
+    <!-- Main Search Bar -->
+    <div class="nav-search">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" id="searchInput" placeholder="Buscar por perfume, marca ou nota (ex: Sauvage, Baunilha, Dior, Mel, Vetiver)..." autocomplete="off" />
+      <button id="clearSearchBtn" class="clear-search-btn" title="Limpar busca">&times;</button>
+    </div>
+
+    <div class="nav-actions">
+      <button class="nav-btn" id="favoritesFilterBtn" title="Ver meus perfumes favoritos">
+        <span class="heart-icon">♥</span>
+        <span class="btn-text">Favoritos</span>
+        <span class="badge" id="favCountBadge">0</span>
+      </button>
     </div>
   </header>
 
   <!-- Hero Section -->
   <section class="hero">
-    <p class="hero-tagline">CURADORIA DE ALTA PERFUMARIA</p>
-    <h1>Encontre sua assinatura olfativa</h1>
-    <p class="hero-desc">Selecione suas preferências abaixo para calcular a afinidade aromática em tempo real.</p>
+    <div class="hero-tag">✦ ARQUIVO DE ALTA PERFUMARIA MUNDIAL ✦</div>
+    <h1 class="hero-title">Encontre Sua Assinatura Olfativa</h1>
+    <p class="hero-description">
+      Mais de <strong>300 fragrâncias consagradas</strong> catalogadas. Selecione as características abaixo ou pesquise notas aromáticas para filtrar em tempo real.
+    </p>
+
+    <!-- Stats Ribbon -->
+    <div class="stats-ribbon">
+      <div class="stat-item">
+        <span class="stat-num" id="totalPerfumesStat">300</span>
+        <span class="stat-lbl">Fragrâncias</span>
+      </div>
+      <div class="stat-sep">•</div>
+      <div class="stat-item">
+        <span class="stat-num">50+</span>
+        <span class="stat-lbl">Casas de Luxo</span>
+      </div>
+      <div class="stat-sep">•</div>
+      <div class="stat-item">
+        <span class="stat-num">100%</span>
+        <span class="stat-lbl">Pirâmides Reais</span>
+      </div>
+    </div>
   </section>
 
-  <!-- Match Engine / Filters -->
-  <section class="filter-panel">
-    <div class="filter-header">
-      <h2>✦ Motor de Compatibilidade Olfativa</h2>
-      <button id="resetFiltersBtn" class="btn-ghost">Limpar Filtros</button>
+  <!-- Filter Console -->
+  <section class="filter-console">
+    <div class="filter-console-header">
+      <div class="console-title">
+        <span class="gold-dot"></span>
+        <h2>Filtros de Busca Avançada</h2>
+      </div>
+
+      <div class="filter-controls-top">
+        <button id="resetFiltersBtn" class="btn-reset">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+            <path d="M3 3v5h5"></path>
+          </svg>
+          Limpar Filtros
+        </button>
+      </div>
     </div>
 
-    <div class="filter-grid">
-      <!-- Gênero -->
-      <div class="filter-group">
-        <label>Gênero</label>
+    <!-- Active Filter Tags Display -->
+    <div class="active-tags-bar" id="activeTagsBar" style="display: none;">
+      <span class="active-tags-label">Filtros Selecionados:</span>
+      <div class="active-tags-list" id="activeTagsList"></div>
+    </div>
+
+    <!-- Filter Categories Grid -->
+    <div class="filter-sections-grid">
+      <!-- 1. Gênero -->
+      <div class="filter-card">
+        <span class="filter-card-title">1. Gênero</span>
         <div class="chip-group" data-filter="gender">
           <button class="chip" data-value="Masculino">Masculino</button>
           <button class="chip" data-value="Feminino">Feminino</button>
@@ -49,72 +111,111 @@
         </div>
       </div>
 
-      <!-- Família Olfativa -->
-      <div class="filter-group">
-        <label>Família Olfativa Principal</label>
+      <!-- 2. Família Olfativa -->
+      <div class="filter-card">
+        <span class="filter-card-title">2. Família Olfativa</span>
         <div class="chip-group" data-filter="family">
           <button class="chip" data-value="Amadeirado">Amadeirado</button>
-          <button class="chip" data-value="Oriental/Âmbar">Oriental / Âmbar</button>
+          <button class="chip" data-value="Oriental">Oriental / Âmbar</button>
           <button class="chip" data-value="Floral">Floral</button>
-          <button class="chip" data-value="Gourmand">Gourmand</button>
-          <button class="chip" data-value="Cítrico/Fresco">Cítrico / Fresco</button>
-          <button class="chip" data-value="Aquático/Aromático">Aquático / Aromático</button>
+          <button class="chip" data-value="Gourmand">Gourmand (Doce)</button>
+          <button class="chip" data-value="Cítrico / Fresco">Cítrico / Fresco</button>
+          <button class="chip" data-value="Aquático / Fresco">Aquático</button>
+          <button class="chip" data-value="Aromático / Fougère">Aromático</button>
+          <button class="chip" data-value="Couro">Couro</button>
+          <button class="chip" data-value="Chipre">Chipre</button>
         </div>
       </div>
 
-      <!-- Ocasião / Clima -->
-      <div class="filter-group">
-        <label>Ocasião de Uso</label>
+      <!-- 3. Ocasião & Clima -->
+      <div class="filter-card">
+        <span class="filter-card-title">3. Ocasião & Clima</span>
         <div class="chip-group" data-filter="occasion">
+          <button class="chip" data-value="Dia a Dia">Dia a Dia</button>
+          <button class="chip" data-value="Trabalho / Formal">Trabalho / Formal</button>
           <button class="chip" data-value="Noite / Balada">Noite / Balada</button>
-          <button class="chip" data-value="Encontro / Romance">Encontro / Romance</button>
-          <button class="chip" data-value="Dia a Dia / Trabalho">Dia a Dia / Trabalho</button>
-          <button class="chip" data-value="Clima Frio">Clima Frio</button>
-          <button class="chip" data-value="Verão / Calor">Verão / Calor</button>
-          <button class="chip" data-value="Formal / Gala">Formal / Gala</button>
+          <button class="chip" data-value="Encontro Romântico">Encontro Romântico</button>
+          <button class="chip" data-value="Calor / Verão">Calor / Verão</button>
+          <button class="chip" data-value="Clima Frio / Inverno">Clima Frio / Inverno</button>
         </div>
       </div>
 
-      <!-- Intensidade / Projeção -->
-      <div class="filter-group">
-        <label>Intensidade / Projeção</label>
+      <!-- 4. Intensidade / Projeção -->
+      <div class="filter-card">
+        <span class="filter-card-title">4. Intensidade & Fixação</span>
         <div class="chip-group" data-filter="intensity">
-          <button class="chip" data-value="Moderada">Discreta / Elegante</button>
-          <button class="chip" data-value="Intensa">Marcante</button>
-          <button class="chip" data-value="Bomba">Projeção Extrema</button>
+          <button class="chip" data-value="Discreta / Íntima">Discreta / Íntima</button>
+          <button class="chip" data-value="Moderada">Moderada</button>
+          <button class="chip" data-value="Marcante / Intensa">Marcante / Intensa</button>
+          <button class="chip" data-value="Bomba / Rastro Extremo">Bomba Extrema</button>
         </div>
       </div>
     </div>
 
-    <div class="sort-bar">
-      <span id="resultsCount">50 fragrâncias catalogadas</span>
-      <div class="sort-select-wrapper">
+    <!-- Catalog Status & Sorting Bar -->
+    <div class="catalog-toolbar">
+      <div class="results-info">
+        Mostrando <strong class="counter-highlight" id="resultsCount">300</strong> perfumes
+      </div>
+
+      <div class="sort-box">
         <label for="sortSelect">Ordenar por:</label>
         <select id="sortSelect">
-          <option value="match">Maior Afinidade (Match %)</option>
-          <option value="salesRank">Ranking de Vendas Mundial</option>
-          <option value="rating">Melhor Avaliação da Crítica</option>
-          <option value="name">Nome (A-Z)</option>
+          <option value="salesRank">Ranking Global de Vendas (#1 ao #300)</option>
+          <option value="rating">Melhor Avaliação da Crítica (★ 5.0)</option>
+          <option value="brand">Marca / Casa de Perfumaria (A-Z)</option>
+          <option value="name">Nome do Perfume (A-Z)</option>
         </select>
       </div>
     </div>
   </section>
 
+  <!-- Empty State (When no results found) -->
+  <div class="empty-state" id="emptyState" style="display: none;">
+    <div class="empty-icon">✧</div>
+    <h3>Nenhum perfume encontrado</h3>
+    <p id="emptyStateMsg">Não encontramos perfumes correspondentes aos filtros selecionados. Tente remover alguns filtros ou buscar por termos mais amplos.</p>
+    <button class="btn-gold" id="emptyResetBtn">Restaurar Todos os Perfumes</button>
+  </div>
+
   <!-- Perfume Catalog Grid -->
-  <main class="catalog-grid" id="catalogGrid">
-    <!-- Cards renderizados via JavaScript -->
+  <main class="catalog-container">
+    <div class="catalog-grid" id="catalogGrid">
+      <!-- Perfume Cards dynamically rendered here -->
+    </div>
+
+    <div class="pagination-wrapper" id="paginationWrapper">
+      <button class="btn-load-more" id="loadMoreBtn">
+        Carregar Mais Perfumes (<span id="loadMoreRemaining">0</span> restantes)
+      </button>
+    </div>
   </main>
 
-  <!-- Modal Detalhes do Perfume -->
+  <!-- Immersive Detail Modal -->
   <div class="modal-overlay" id="perfumeModal">
-    <div class="modal-content">
-      <button class="modal-close" id="modalCloseBtn">&times;</button>
+    <div class="modal-card">
+      <button class="modal-close" id="modalCloseBtn" aria-label="Fechar Modal">&times;</button>
       <div class="modal-body" id="modalBody">
-        <!-- Detalhes injetados dinamicamente -->
+        <!-- Dynamic content injected by app.js -->
       </div>
     </div>
   </div>
 
+  <!-- Toast Notification -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-logo">
+        <span class="logo-symbol">✦</span> NOIR LUXURY ARCHIVE
+      </div>
+      <p class="footer-copy">Curadoria dos maiores clássicos e novidades da perfumaria mundial. Base de dados aberta e expansível.</p>
+      <div class="footer-note">Pronto para GitHub Pages • Vanilla JS • Zero Dependências</div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
   <script src="perfumes.js"></script>
   <script src="app.js"></script>
 </body>
