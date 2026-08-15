@@ -1,476 +1,210 @@
-/**
- * NOIR PARFUMS - Recommendation Engine & Interactive Filtering
- * Agora 100% blindado contra surtos de Encoding do Windows.
- */
-
 document.addEventListener('DOMContentLoaded', () => {
-  // Pegando os elementos do HTML
+  
+  // ----- PRELOADER LOGIC -----
+  window.addEventListener('load', () => {
+    // Dá um tempinho extra para exibir a animação linda do perfume espirrando
+    setTimeout(() => {
+      const preloader = document.getElementById('preloader');
+      if(preloader) {
+        preloader.classList.add('hidden');
+        setTimeout(() => preloader.style.display = 'none', 800); // remove do DOM
+      }
+    }, 2000); 
+  });
+
+  // Efeitos Navbar Scrolled
+  window.addEventListener('scroll', () => {
+    const nav = document.getElementById('navbar');
+    if(window.scrollY > 50) nav.classList.add('scrolled');
+    else nav.classList.remove('scrolled');
+  });
+
   const catalogGrid = document.getElementById('catalogGrid');
   const searchInput = document.getElementById('searchInput');
   const clearSearchBtn = document.getElementById('clearSearchBtn');
   const sortSelect = document.getElementById('sortSelect');
   const resultsCount = document.getElementById('resultsCount');
-  const totalPerfumesStat = document.getElementById('totalPerfumesStat');
-  const resetFiltersBtn = document.getElementById('resetFiltersBtn');
-  const emptyResetBtn = document.getElementById('emptyResetBtn');
   const activeTagsBar = document.getElementById('activeTagsBar');
   const activeTagsList = document.getElementById('activeTagsList');
-  const emptyState = document.getElementById('emptyState');
-  const emptyStateMsg = document.getElementById('emptyStateMsg');
   const loadMoreBtn = document.getElementById('loadMoreBtn');
-  const loadMoreRemaining = document.getElementById('loadMoreRemaining');
-  const paginationWrapper = document.getElementById('paginationWrapper');
-  const favoritesFilterBtn = document.getElementById('favoritesFilterBtn');
-  const favCountBadge = document.getElementById('favCountBadge');
-  
-  // Elementos do Modal
   const modal = document.getElementById('perfumeModal');
-  const modalBody = document.getElementById('modalBody');
-  const modalCloseBtn = document.getElementById('modalCloseBtn');
-  const toast = document.getElementById('toast');
 
-  // Verificação robusta do Banco de Dados (Para o navegador não chorar)
-  let database = [];
-  if (typeof window.PERFUMES_DB !== 'undefined' && Array.isArray(window.PERFUMES_DB)) {
-    database = window.PERFUMES_DB;
-  } else if (typeof PERFUMES_DB !== 'undefined' && Array.isArray(PERFUMES_DB)) {
-    database = PERFUMES_DB;
-  }
-
-  // Atualiza as estatísticas do topo
-  if (totalPerfumesStat) totalPerfumesStat.textContent = database.length;
-
-  // Estado Atual do Sistema
-  const ITEMS_PER_PAGE = 24;
+  let database = window.PERFUMES_DB || [];
   let currentPage = 1;
+  const ITEMS_PER_PAGE = 24;
+  let activeFilters = { gender: [], family: [], occasion: [], intensity: [] };
   let searchQuery = '';
   let currentSort = 'salesRank';
-  let showFavoritesOnly = false;
+  
+  let favorites = JSON.parse(localStorage.getItem('terra_favorites') || '[]');
+  let showFavorites = false;
 
-  let activeFilters = {
-    gender: [],
-    family: [],
-    occasion: [],
-    intensity: []
-  };
+  document.getElementById('favCountBadge').textContent = favorites.length;
 
-  // Puxando seus favoritos do abismo do LocalStorage
-  let favorites = JSON.parse(localStorage.getItem('noir_favorites') || '[]');
-  updateFavBadge();
-
-  // Função anti-surto para limpar acentos (agora usando regex segura e escapada)
-  function normalizeText(text) {
-    if (!text) return '';
-    return text
-      .toString()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase()
-      .trim();
+  function normalize(str) {
+    return str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() : '';
   }
 
-  // --------------------------------------------------------------------------
-  // EVENTOS DE CLIQUE DOS FILTROS (CHIPS)
-  // --------------------------------------------------------------------------
-  document.querySelectorAll('.chip-group').forEach(group => {
-    const filterType = group.dataset.filter;
-    group.querySelectorAll('.chip').forEach(chip => {
-      chip.addEventListener('click', () => {
-        const val = chip.dataset.value;
-        chip.classList.toggle('active');
-        
-        if (activeFilters[filterType].includes(val)) {
-          activeFilters[filterType] = activeFilters[filterType].filter(item => item !== val);
-        } else {
-          activeFilters[filterType].push(val);
-        }
-
-        currentPage = 1; // Reseta a paginação
-        renderActiveTags();
-        renderCatalog();
-      });
+  // Bind Chips
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', (e) => {
+      const type = e.target.closest('.chip-group').dataset.filter;
+      const val = e.target.dataset.value;
+      e.target.classList.toggle('active');
+      
+      if(activeFilters[type].includes(val)) {
+        activeFilters[type] = activeFilters[type].filter(v => v !== val);
+      } else {
+        activeFilters[type].push(val);
+      }
+      currentPage = 1;
+      render();
     });
   });
 
-  // Botão Mágico de Resetar Tudo
-  function resetAllFilters() {
+  // Search
+  searchInput.addEventListener('input', e => {
+    searchQuery = e.target.value;
+    clearSearchBtn.style.display = searchQuery ? 'block' : 'none';
+    currentPage = 1; render();
+  });
+  
+  clearSearchBtn.addEventListener('click', () => {
+    searchInput.value = ''; searchQuery = ''; clearSearchBtn.style.display = 'none';
+    currentPage = 1; render();
+  });
+
+  // Sort & Favs
+  sortSelect.addEventListener('change', e => { currentSort = e.target.value; currentPage = 1; render(); });
+  document.getElementById('favoritesFilterBtn').addEventListener('click', function() {
+    showFavorites = !showFavorites;
+    this.classList.toggle('active');
+    currentPage = 1; render();
+  });
+
+  document.getElementById('resetFiltersBtn').addEventListener('click', resetAll);
+  document.getElementById('emptyResetBtn').addEventListener('click', resetAll);
+  
+  function resetAll() {
     activeFilters = { gender: [], family: [], occasion: [], intensity: [] };
     document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    searchInput.value = '';
-    searchQuery = '';
-    if (clearSearchBtn) clearSearchBtn.style.display = 'none';
-    showFavoritesOnly = false;
-    if (favoritesFilterBtn) favoritesFilterBtn.classList.remove('active');
-    
-    currentPage = 1;
-    renderActiveTags();
-    renderCatalog();
-    showToast('Tudo limpo! Voltamos à estaca zero.');
+    searchInput.value = ''; searchQuery = ''; clearSearchBtn.style.display='none';
+    showFavorites = false; document.getElementById('favoritesFilterBtn').classList.remove('active');
+    currentPage = 1; render();
   }
 
-  if (resetFiltersBtn) resetFiltersBtn.addEventListener('click', resetAllFilters);
-  if (emptyResetBtn) emptyResetBtn.addEventListener('click', resetAllFilters);
-
-  // --------------------------------------------------------------------------
-  // BARRA DE BUSCA
-  // --------------------------------------------------------------------------
-  if (searchInput) {
-    searchInput.addEventListener('input', (e) => {
-      searchQuery = e.target.value;
-      if (clearSearchBtn) clearSearchBtn.style.display = searchQuery.trim().length > 0 ? 'block' : 'none';
-      currentPage = 1;
-      renderCatalog();
-    });
-  }
-
-  if (clearSearchBtn) {
-    clearSearchBtn.addEventListener('click', () => {
-      searchInput.value = '';
-      searchQuery = '';
-      clearSearchBtn.style.display = 'none';
-      currentPage = 1;
-      renderCatalog();
-      searchInput.focus();
-    });
-  }
-
-  // --------------------------------------------------------------------------
-  // ORDENAÇÃO E FAVORITOS
-  // --------------------------------------------------------------------------
-  if (sortSelect) {
-    sortSelect.addEventListener('change', (e) => {
-      currentSort = e.target.value;
-      currentPage = 1;
-      renderCatalog();
-    });
-  }
-
-  if (favoritesFilterBtn) {
-    favoritesFilterBtn.addEventListener('click', () => {
-      showFavoritesOnly = !showFavoritesOnly;
-      favoritesFilterBtn.classList.toggle('active', showFavoritesOnly);
-      currentPage = 1;
-      renderCatalog();
-      showToast(showFavoritesOnly ? 'Modo VIP: Só seus favoritos.' : 'Mostrando todo o acervo.');
-    });
-  }
-
-  if (loadMoreBtn) {
-    loadMoreBtn.addEventListener('click', () => {
-      currentPage += 1;
-      renderCatalog(true);
-    });
-  }
-
-  // --------------------------------------------------------------------------
-  // TAGS VISUAIS NO TOPO
-  // --------------------------------------------------------------------------
-  function renderActiveTags() {
-    const allActive = [];
-    Object.keys(activeFilters).forEach(type => {
-      activeFilters[type].forEach(val => {
-        allActive.push({ type, val });
-      });
-    });
-
-    if (allActive.length === 0) {
-      if (activeTagsBar) activeTagsBar.style.display = 'none';
-      if (activeTagsList) activeTagsList.innerHTML = '';
-      return;
-    }
-
-    if (activeTagsBar) activeTagsBar.style.display = 'flex';
-    if (activeTagsList) {
-      activeTagsList.innerHTML = allActive.map(item => `
-        <span class="active-tag-chip" onclick="removeActiveFilter('${item.type}', '${item.val}')">
-          ${item.val} <span class="close-x">&times;</span>
-        </span>
-      `).join('');
-    }
-  }
-
-  window.removeActiveFilter = function(type, val) {
+  window.removeActiveFilter = (type, val) => {
     activeFilters[type] = activeFilters[type].filter(v => v !== val);
-    const group = document.querySelector(`.chip-group[data-filter="${type}"]`);
-    if (group) {
-      const chip = group.querySelector(`.chip[data-value="${val}"]`);
-      if (chip) chip.classList.remove('active');
-    }
-    renderActiveTags();
-    renderCatalog();
+    document.querySelector(`.chip-group[data-filter="${type}"] .chip[data-value="${val}"]`).classList.remove('active');
+    currentPage = 1; render();
   };
 
-  // --------------------------------------------------------------------------
-  // O CÉREBRO DA OPERAÇÃO (FILTRO + ORDENAÇÃO)
-  // --------------------------------------------------------------------------
-  function filterAndSortData() {
-    const qNorm = normalizeText(searchQuery);
-
-    let list = database.filter(p => {
-      // Favoritos
-      if (showFavoritesOnly && !favorites.includes(p.id)) return false;
-
-      // Busca por Texto Livre
-      if (qNorm) {
-        const fullContent = normalizeText(`
-          ${p.name} ${p.brand} ${p.family} ${p.gender} 
-          ${p.intensity} ${p.topNotes} ${p.heartNotes} 
-          ${p.baseNotes} ${p.occasions.join(' ')}
-        `);
-        if (!fullContent.includes(qNorm)) return false;
-      }
-
-      // Gênero
-      if (activeFilters.gender.length > 0) {
-        const matchesGender = activeFilters.gender.some(g => {
-          return g === p.gender || p.gender === 'Unissex' || g === 'Unissex';
-        });
-        if (!matchesGender) return false;
-      }
-
-      // Família
-      if (activeFilters.family.length > 0) {
-        const pFamNorm = normalizeText(p.family);
-        const matchesFamily = activeFilters.family.some(f => {
-          const fNorm = normalizeText(f);
-          return pFamNorm.includes(fNorm) || fNorm.includes(pFamNorm);
-        });
-        if (!matchesFamily) return false;
-      }
-
-      // Ocasião
-      if (activeFilters.occasion.length > 0) {
-        const pOccsNorm = p.occasions.map(o => normalizeText(o));
-        const matchesOccasion = activeFilters.occasion.some(occ => {
-          const occNorm = normalizeText(occ);
-          return pOccsNorm.some(pOcc => pOcc.includes(occNorm) || occNorm.includes(pOcc));
-        });
-        if (!matchesOccasion) return false;
-      }
-
-      // Intensidade
-      if (activeFilters.intensity.length > 0) {
-        const pInteNorm = normalizeText(p.intensity);
-        const matchesIntensity = activeFilters.intensity.some(inte => {
-          const inteNorm = normalizeText(inte);
-          return pInteNorm.includes(inteNorm) || inteNorm.includes(pInteNorm);
-        });
-        if (!matchesIntensity) return false;
-      }
-
-      return true; // Passou na blitz!
-    });
-
-    // Ordenação
-    list.sort((a, b) => {
-      if (currentSort === 'salesRank') return a.salesRank - b.salesRank;
-      if (currentSort === 'rating') return b.rating - a.rating;
-      if (currentSort === 'brand') return a.brand.localeCompare(b.brand);
-      if (currentSort === 'name') return a.name.localeCompare(b.name);
-      return 0;
-    });
-
-    return list;
-  }
-
-  // --------------------------------------------------------------------------
-  // RENDERIZAÇÃO DOS CARDS
-  // --------------------------------------------------------------------------
-  function renderCatalog(append = false) {
-    if (!catalogGrid) return;
-
-    if (database.length === 0) {
-      catalogGrid.innerHTML = '<p style="color: #ff4b72; padding: 2rem; font-weight: bold;">Oops! O banco de dados (perfumes.js) não foi carregado corretamente.</p>';
-      return;
+  function render() {
+    const qNorm = normalize(searchQuery);
+    
+    // Atualiza Tags Ativas
+    const tags = Object.entries(activeFilters).flatMap(([k,v]) => v.map(val => ({k, val})));
+    if(tags.length > 0) {
+      activeTagsBar.style.display = 'flex';
+      activeTagsList.innerHTML = tags.map(t => `<span class="active-tag-chip" onclick="removeActiveFilter('${t.k}','${t.val}')">${t.val} &times;</span>`).join('');
+    } else {
+      activeTagsBar.style.display = 'none';
     }
 
-    const filteredList = filterAndSortData();
-    if (resultsCount) resultsCount.textContent = filteredList.length;
+    let filtered = database.filter(p => {
+      if(showFavorites && !favorites.includes(p.id)) return false;
+      
+      if(qNorm) {
+        const txt = normalize(`${p.name} ${p.brand} ${p.family} ${p.topNotes} ${p.baseNotes}`);
+        if(!txt.includes(qNorm)) return false;
+      }
+      
+      if(activeFilters.gender.length && !activeFilters.gender.some(g => g === p.gender || p.gender==='Unissex')) return false;
+      if(activeFilters.family.length && !activeFilters.family.some(f => normalize(p.family).includes(normalize(f)))) return false;
+      if(activeFilters.occasion.length && !activeFilters.occasion.some(o => p.occasions.map(normalize).some(po => po.includes(normalize(o))))) return false;
+      if(activeFilters.intensity.length && !activeFilters.intensity.includes(p.intensity)) return false;
 
-    // Estado Vazio
-    if (filteredList.length === 0) {
+      return true;
+    });
+
+    filtered.sort((a,b) => {
+      if(currentSort==='salesRank') return a.salesRank - b.salesRank;
+      if(currentSort==='rating') return b.rating - a.rating;
+      if(currentSort==='brand') return a.brand.localeCompare(b.brand);
+      return a.name.localeCompare(b.name);
+    });
+
+    resultsCount.textContent = filtered.length;
+    
+    const emptyState = document.getElementById('emptyState');
+    if(filtered.length === 0) {
       catalogGrid.innerHTML = '';
-      if (emptyState) emptyState.style.display = 'block';
-      if (paginationWrapper) paginationWrapper.style.display = 'none';
-
-      if (emptyStateMsg) {
-        if (showFavoritesOnly) {
-          emptyStateMsg.textContent = 'Ainda não há favoritos aqui. Clique no coraçãozinho em algum perfume para salvá-lo!';
-        } else if (searchQuery) {
-          emptyStateMsg.textContent = `Nada encontrado para "${searchQuery}". Talvez esse perfume seja de um universo paralelo.`;
-        } else {
-          emptyStateMsg.textContent = 'Sua combinação de filtros foi exigente demais. Tente remover alguma coisa.';
-        }
-      }
+      emptyState.style.display = 'block';
+      document.getElementById('paginationWrapper').style.display = 'none';
       return;
-    } else {
-      if (emptyState) emptyState.style.display = 'none';
     }
+    emptyState.style.display = 'none';
 
-    // Paginação
-    const totalToShow = currentPage * ITEMS_PER_PAGE;
-    const itemsToRender = filteredList.slice(0, totalToShow);
-    const remainingCount = Math.max(0, filteredList.length - itemsToRender.length);
+    const itemsToShow = filtered.slice(0, currentPage * ITEMS_PER_PAGE);
+    document.getElementById('paginationWrapper').style.display = itemsToShow.length < filtered.length ? 'block' : 'none';
+    document.getElementById('loadMoreRemaining').textContent = filtered.length - itemsToShow.length;
 
-    if (paginationWrapper && loadMoreRemaining) {
-      if (remainingCount > 0) {
-        paginationWrapper.style.display = 'block';
-        loadMoreRemaining.textContent = remainingCount;
-      } else {
-        paginationWrapper.style.display = 'none';
-      }
-    }
-
-    // Criando os HTML Cards
-    const cardsHtml = itemsToRender.map(p => {
-      const isFav = favorites.includes(p.id);
-      const safeIntensity = p.intensity ? p.intensity.split('/')[0].trim() : '';
-      const safeOccasion = p.occasions && p.occasions[0] ? p.occasions[0] : 'Elegante';
-      const safeNotes = p.topNotes ? p.topNotes.split(',').slice(0, 3).join(', ') : 'Exclusivas';
-
-      return `
-        <div class="card" onclick="openModal(${p.id})">
-          <div class="card-media">
-            <span class="card-badge-rank">#${p.salesRank || '?'} GLOBAL</span>
-            <button class="card-fav-btn ${isFav ? 'favorited' : ''}" 
-                    title="${isFav ? 'Remover dos Favoritos' : 'Salvar nos Favoritos'}" 
-                    onclick="toggleFavorite(event, ${p.id})">
-              ♥
-            </button>
-            <img src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1594035910387-fea47794261f?w=600&auto=format&fit=crop&q=80'" />
-          </div>
-          <div class="card-body">
-            <div class="card-brand">${p.brand}</div>
-            <h3 class="card-name">${p.name}</h3>
-            
-            <div class="card-meta">
-              <span class="card-stars">★ ${p.rating ? p.rating.toFixed(1) : 'N/A'}</span>
-              <span>${p.gender} • ${safeIntensity}</span>
-            </div>
-
-            <p class="card-notes">
-              <strong>Notas:</strong> ${safeNotes}...
-            </p>
-
-            <div class="card-tags">
-              <span class="tag-badge">${p.family}</span>
-              <span class="tag-badge">${safeOccasion}</span>
-            </div>
-          </div>
+    catalogGrid.innerHTML = itemsToShow.map(p => `
+      <div class="card" onclick="openModal(${p.id})">
+        <div class="card-media">
+          <span class="card-badge-rank">#${p.salesRank} GLOBAL</span>
+          <button class="card-fav-btn ${favorites.includes(p.id) ? 'favorited' : ''}" onclick="toggleFav(event, ${p.id})">♥</button>
+          <img src="${p.image}" loading="lazy">
         </div>
-      `;
-    }).join('');
-
-    catalogGrid.innerHTML = cardsHtml;
+        <div class="card-body">
+          <div class="card-brand">${p.brand}</div>
+          <h3 class="card-name">${p.name}</h3>
+          <div class="card-meta"><span>★ ${p.rating.toFixed(1)}</span><span>${p.intensity.split('/')[0]}</span></div>
+          <div class="card-tags"><span class="tag-badge">${p.family}</span><span class="tag-badge">${p.gender}</span></div>
+        </div>
+      </div>
+    `).join('');
   }
 
-  // --------------------------------------------------------------------------
-  // SISTEMA DE FAVORITOS
-  // --------------------------------------------------------------------------
-  window.toggleFavorite = function(e, id) {
-    e.stopPropagation(); // Evita abrir o modal ao clicar no coração
-    if (favorites.includes(id)) {
-      favorites = favorites.filter(favId => favId !== id);
-      showToast('Removido dos favoritos 💔');
-    } else {
-      favorites.push(id);
-      showToast('Adicionado aos favoritos ♥');
-    }
-    localStorage.setItem('noir_favorites', JSON.stringify(favorites));
-    updateFavBadge();
-    renderCatalog();
+  loadMoreBtn.addEventListener('click', () => { currentPage++; render(); });
+
+  window.toggleFav = (e, id) => {
+    e.stopPropagation();
+    if(favorites.includes(id)) { favorites = favorites.filter(x => x !== id); showToast('Removido dos favoritos 💔');}
+    else { favorites.push(id); showToast('Salvo nos favoritos ♥');}
+    localStorage.setItem('terra_favorites', JSON.stringify(favorites));
+    document.getElementById('favCountBadge').textContent = favorites.length;
+    render();
   };
 
-  function updateFavBadge() {
-    if (favCountBadge) favCountBadge.textContent = favorites.length;
-  }
-
-  // --------------------------------------------------------------------------
-  // O FAMOSO MODAL DETALHADO
-  // --------------------------------------------------------------------------
-  window.openModal = function(id) {
-    const p = database.find(item => item.id === id);
-    if (!p) return;
-
-    modalBody.innerHTML = `
-      <div class="modal-media">
-        <img src="${p.image}" alt="${p.name}" />
-      </div>
+  window.openModal = id => {
+    const p = database.find(x => x.id === id);
+    document.getElementById('modalBody').innerHTML = `
+      <div class="modal-media"><img src="${p.image}"></div>
       <div class="modal-details">
-        <div class="modal-header-meta">
-          <span class="modal-brand">${p.brand}</span>
-          <span class="modal-rank-badge">Ranking Global #${p.salesRank}</span>
-        </div>
-
+        <div class="modal-brand">${p.brand}</div>
         <h2 class="modal-title">${p.name}</h2>
-        <div class="modal-rating-row">
-          <span style="color: #ffbe3b; font-weight: bold;">★ ${p.rating ? p.rating.toFixed(1) : 'N/A'} / 5.0</span>
-          <span>•</span>
-          <span>${p.gender}</span>
-          <span>•</span>
-          <span>${p.intensity}</span>
-        </div>
-
+        <p style="color:#d4af37; margin-bottom:15px; font-weight:bold;">★ ${p.rating} | Rank #${p.salesRank}</p>
         <p class="modal-desc">${p.description}</p>
-
         <div class="pyramid-box">
-          <div class="pyramid-row">
-            <span class="lvl-name">Topo:</span>
-            <span class="lvl-notes">${p.topNotes}</span>
-          </div>
-          <div class="pyramid-row">
-            <span class="lvl-name">Coração:</span>
-            <span class="lvl-notes">${p.heartNotes}</span>
-          </div>
-          <div class="pyramid-row">
-            <span class="lvl-name">Fundo:</span>
-            <span class="lvl-notes">${p.baseNotes}</span>
-          </div>
-        </div>
-
-        <div class="modal-tags" style="margin-top: auto; display: flex; flex-wrap: wrap; gap: 5px;">
-          <span class="tag-badge" style="border-color: var(--gold-primary); color: var(--gold-light);">Família: ${p.family}</span>
-          ${(p.occasions || []).map(occ => `<span class="tag-badge">${occ}</span>`).join('')}
+          <div class="pyramid-row"><span class="lvl-name">Topo:</span><span class="lvl-notes">${p.topNotes}</span></div>
+          <div class="pyramid-row"><span class="lvl-name">Corpo:</span><span class="lvl-notes">${p.heartNotes}</span></div>
+          <div class="pyramid-row"><span class="lvl-name">Fundo:</span><span class="lvl-notes">${p.baseNotes}</span></div>
         </div>
       </div>
     `;
-
     modal.classList.add('active');
-    document.body.style.overflow = 'hidden'; // Trava o scroll do fundo
   };
 
-  if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeModal);
-  if (modal) {
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) closeModal();
-    });
-  }
+  document.getElementById('modalCloseBtn').addEventListener('click', () => modal.classList.remove('active'));
+  modal.addEventListener('click', e => { if(e.target === modal) modal.classList.remove('active'); });
 
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal && modal.classList.contains('active')) {
-      closeModal();
-    }
-  });
-
-  function closeModal() {
-    if (modal) modal.classList.remove('active');
-    document.body.style.overflow = '';
-  }
-
-  // --------------------------------------------------------------------------
-  // MENSAGENS TOAST
-  // --------------------------------------------------------------------------
-  let toastTimer;
   function showToast(msg) {
-    if (!toast) return;
-    clearTimeout(toastTimer);
-    toast.textContent = msg;
-    toast.classList.add('active');
-    toastTimer = setTimeout(() => {
-      toast.classList.remove('active');
-    }, 2400);
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('active');
+    setTimeout(() => t.classList.remove('active'), 2500);
   }
 
-  // Dá a largada na aplicação!
-  renderCatalog();
+  // Init (wait for window load to let preloader shine)
+  render();
 });
