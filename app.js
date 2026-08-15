@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // Google Script Web App URL (REPLACE WITH YOURS)
-  const GOOGLE_APP_URL = "SUA_URL_DO_GOOGLE_APPS_SCRIPT_AQUI";
+  const GOOGLE_APP_URL = "https://script.google.com/macros/s/AKfycbxbfQhNOjVWGVSglJW2AZCmupuRp7UI7_rr8TlQaBCHAAE4lFP-GIIa3cH90Io1yTTO/exec";
 
   window.submitQuiz = function() {
     const btn = document.getElementById('btnSubmitQuiz');
