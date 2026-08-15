@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // Google Script Web App URL (REPLACE WITH YOURS)
-  const GOOGLE_APP_URL = "https://script.google.com/macros/s/AKfycbxbfQhNOjVWGVSglJW2AZCmupuRp7UI7_rr8TlQaBCHAAE4lFP-GIIa3cH90Io1yTTO/exec";
+  const GOOGLE_APP_URL = "https://script.google.com/macros/s/AKfycbx8u0ROF5RadqeP6HKIrTY1m9UGtiiWaGcqooasVQ7r7m-3UYCcXpGVaPY7tGm9yRWI/exec";
 
   window.submitQuiz = function() {
     const btn = document.getElementById('btnSubmitQuiz');
