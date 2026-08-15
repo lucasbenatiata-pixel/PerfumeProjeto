@@ -6,7 +6,6 @@
   <title>Duchi & Co. | Curadoria de Fragrâncias</title>
   <meta name="description" content="O maior acervo de alta perfumaria selecionado pela Duchi & Co." />
   
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -14,17 +13,287 @@
 </head>
 <body>
 
-  <!-- PRELOADER COM MONOGRAMA DOURADO -->
-  <div id="preloader" class="preloader">
-    <div class="preloader-logo-container">
-      <img src="Monograma D&Co. dourado.png" alt="Duchi & Co. Monograma" class="preloader-monogram" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-      <span class="preloader-fallback-text" style="display: none;">D&Co.</span>
+  <!-- QUIZ INTERATIVO (TYPEFORM CLONE) -->
+  <div id="quizOverlay" class="quiz-overlay">
+    
+    <!-- Step 0: Intro -->
+    <div class="quiz-step active" id="qstep-0">
+      <div class="quiz-intro-container">
+        <div class="quiz-intro-left">
+          <img src="Monograma D&Co. verde.png" alt="D&Co" onerror="this.style.display='none'">
+        </div>
+        <div class="quiz-intro-right">
+          <h2>CURADORIA DUCHI</h2>
+          <p>Seu próximo perfume começa por você.</p>
+          <p class="quiz-intro-sub">Conte um pouco sobre seus gostos, seu estilo e o que deseja transmitir.<br>Ao final, nossa curadoria selecionará fragrâncias que realmente façam sentido para você.</p>
+          <button class="btn-quiz-start" onclick="nextQuizStep(1)">Descobrir meu perfume</button>
+        </div>
+      </div>
+      <button class="quiz-close-btn" onclick="closeQuiz()">&times; Voltar ao site</button>
     </div>
-    <div class="preloader-line"></div>
-    <p class="preloader-status">Curadoria de Fragrâncias...</p>
+
+    <!-- Step 1: Nome -->
+    <div class="quiz-step" id="qstep-1">
+      <div class="quiz-content">
+        <div class="quiz-header">
+          <span class="quiz-number">1</span>
+          <h2>Como podemos te chamar?*</h2>
+        </div>
+        <p class="quiz-desc">Queremos deixar sua Curadoria Duchi com a sua cara. ✦</p>
+        <div class="quiz-input-group">
+          <label>Nome*</label>
+          <input type="text" id="quiz_nome" placeholder="Digite seu nome" autocomplete="off" onkeypress="handleEnter(event, 2)">
+        </div>
+        <div class="quiz-actions">
+          <button class="btn-quiz-ok" onclick="nextQuizStep(2)">OK</button>
+          <span class="quiz-press-enter">Pressione <strong>Enter ↵</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Perfumes Amados -->
+    <div class="quiz-step" id="qstep-2">
+      <div class="quiz-content">
+        <div class="quiz-header">
+          <span class="quiz-number">2</span>
+          <h2>Quais perfumes você usa hoje ou já usou e amou?</h2>
+        </div>
+        <p class="quiz-desc">Pode citar quantos quiser. Eles vão nos ajudar a entender melhor o seu gosto.</p>
+        <div class="quiz-input-group">
+          <textarea id="quiz_amados" rows="2" placeholder="Responda aqui..."></textarea>
+        </div>
+        <div class="quiz-actions">
+          <button class="btn-quiz-ok" onclick="nextQuizStep(3)">OK</button>
+          <button class="btn-quiz-back" onclick="prevQuizStep(1)">Voltar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Não Gosta -->
+    <div class="quiz-step" id="qstep-3">
+      <div class="quiz-content">
+        <div class="quiz-header">
+          <span class="quiz-number">3</span>
+          <h2>Existe algum perfume ou aroma que você não gosta?</h2>
+        </div>
+        <p class="quiz-desc">Se lembrar de algum, conte para nós. Saber o que você não gosta também nos ajuda a acertar na escolha.</p>
+        <div class="quiz-input-group">
+          <textarea id="quiz_odiados" rows="2" placeholder="Responda aqui..."></textarea>
+        </div>
+        <div class="quiz-actions">
+          <button class="btn-quiz-ok" onclick="nextQuizStep(4)">OK</button>
+          <button class="btn-quiz-back" onclick="prevQuizStep(2)">Voltar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: O que procura (Multi) -->
+    <div class="quiz-step" id="qstep-4">
+      <div class="quiz-content">
+        <div class="quiz-header">
+          <span class="quiz-number">4</span>
+          <h2>O que você está procurando no seu próximo perfume?*</h2>
+        </div>
+        <p class="quiz-desc">Pode escolher mais de uma opção.</p>
+        <div class="quiz-options-container multi-select" data-id="quiz_procura">
+          <div class="quiz-option" data-val="Meu perfume assinatura"><span class="opt-letter">A</span>Meu perfume assinatura</div>
+          <div class="quiz-option" data-val="Um perfume para o dia a dia"><span class="opt-letter">B</span>Um perfume para o dia a dia</div>
+          <div class="quiz-option" data-val="Para o trabalho"><span class="opt-letter">C</span>Para o trabalho</div>
+          <div class="quiz-option" data-val="Noites e encontros"><span class="opt-letter">D</span>Noites e encontros</div>
+          <div class="quiz-option" data-val="Ocasiões especiais"><span class="opt-letter">E</span>Ocasiões especiais</div>
+          <div class="quiz-option" data-val="Um perfume marcante"><span class="opt-letter">F</span>Um perfume marcante</div>
+          <div class="quiz-option" data-val="Um perfume que renda elogios"><span class="opt-letter">G</span>Um perfume que renda elogios</div>
+          <div class="quiz-option" data-val="Quero experimentar algo diferente"><span class="opt-letter">H</span>Quero experimentar algo diferente</div>
+          <div class="quiz-option" data-val="Ainda não sei — quero descobrir"><span class="opt-letter">I</span>Ainda não sei — quero descobrir</div>
+        </div>
+        <div class="quiz-actions">
+          <button class="btn-quiz-ok" onclick="nextQuizStep(5)">OK</button>
+          <button class="btn-quiz-back" onclick="prevQuizStep(3)">Voltar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5: Como quer se sentir (Max 3) -->
+    <div class="quiz-step" id="qstep-5">
+      <div class="quiz-content">
+        <div class="quiz-header">
+          <span class="quiz-number">5</span>
+          <h2>Como você quer se sentir usando seu próximo perfume?*</h2>
+        </div>
+        <p class="quiz-desc">Escolha até 3 opções que mais combinam com você.</p>
+        <div class="quiz-options-container multi-select max-3" data-id="quiz_sentir">
+          <div class="quiz-option" data-val="Elegante"><span class="opt-letter">A</span>Elegante</div>
+          <div class="quiz-option" data-val="Sensual"><span class="opt-letter">B</span>Sensual</div>
+          <div class="quiz-option" data-val="Confiante"><span class="opt-letter">C</span>Confiante</div>
+          <div class="quiz-option" data-val="Sofisticada(o)"><span class="opt-letter">D</span>Sofisticada(o)</div>
+          <div class="quiz-option" data-val="Fresca(o)"><span class="opt-letter">E</span>Fresca(o)</div>
+          <div class="quiz-option" data-val="Aconchegante"><span class="opt-letter">F</span>Aconchegante</div>
+          <div class="quiz-option" data-val="Misteriosa(o)"><span class="opt-letter">G</span>Misteriosa(o)</div>
+          <div class="quiz-option" data-val="Delicada(o)"><span class="opt-letter">H</span>Delicada(o)</div>
+          <div class="quiz-option" data-val="Marcante"><span class="opt-letter">I</span>Marcante</div>
+          <div class="quiz-option" data-val="Diferente"><span class="opt-letter">J</span>Diferente</div>
+        </div>
+        <div class="quiz-actions">
+          <button class="btn-quiz-ok" onclick="nextQuizStep(6)">OK</button>
+          <button class="btn-quiz-back" onclick="prevQuizStep(4)">Voltar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 6: Aromas (Multi) -->
+    <div class="quiz-step" id="qstep-6">
+      <div class="quiz-content">
+        <div class="quiz-header">
+          <span class="quiz-number">6</span>
+          <h2>Quais aromas mais despertam seu interesse?*</h2>
+        </div>
+        <p class="quiz-desc">Escolha todos que combinam com o que você gosta. Não precisa conhecer os nomes técnicos.</p>
+        <div class="quiz-options-container multi-select" data-id="quiz_aromas">
+          <div class="quiz-option" data-val="Baunilha e doces"><span class="opt-letter">A</span>Baunilha e doces</div>
+          <div class="quiz-option" data-val="Florais"><span class="opt-letter">B</span>Florais</div>
+          <div class="quiz-option" data-val="Frutados"><span class="opt-letter">C</span>Frutados</div>
+          <div class="quiz-option" data-val="Cítricos e frescos"><span class="opt-letter">D</span>Cítricos e frescos</div>
+          <div class="quiz-option" data-val="Amadeirados"><span class="opt-letter">E</span>Amadeirados</div>
+          <div class="quiz-option" data-val="Âmbar e orientais"><span class="opt-letter">F</span>Âmbar e orientais</div>
+          <div class="quiz-option" data-val="Especiarias"><span class="opt-letter">G</span>Especiarias</div>
+          <div class="quiz-option" data-val="Musk / almíscar"><span class="opt-letter">H</span>Musk / almíscar</div>
+          <div class="quiz-option" data-val="Couro e tabaco"><span class="opt-letter">I</span>Couro e tabaco</div>
+          <div class="quiz-option" data-val="Não sei identificar / Quero ajuda"><span class="opt-letter">J</span>Não sei identificar / Quero ajuda</div>
+        </div>
+        <div class="quiz-actions">
+          <button class="btn-quiz-ok" onclick="nextQuizStep(7)">OK</button>
+          <button class="btn-quiz-back" onclick="prevQuizStep(5)">Voltar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 7: Intensidade (Single) -->
+    <div class="quiz-step" id="qstep-7">
+      <div class="quiz-content">
+        <div class="quiz-header">
+          <span class="quiz-number">7</span>
+          <h2>Qual intensidade você prefere em um perfume?*</h2>
+        </div>
+        <p class="quiz-desc">Pense no quanto você gosta que seu perfume seja percebido pelas pessoas ao seu redor.</p>
+        <div class="quiz-options-container single-select" data-id="quiz_intensidade">
+          <div class="quiz-option" data-val="Bem suave e discreto" onclick="selectSingleAndNext(this, 8)"><span class="opt-letter">A</span>Bem suave e discreto</div>
+          <div class="quiz-option" data-val="Moderado e equilibrado" onclick="selectSingleAndNext(this, 8)"><span class="opt-letter">B</span>Moderado e equilibrado</div>
+          <div class="quiz-option" data-val="Intenso e marcante" onclick="selectSingleAndNext(this, 8)"><span class="opt-letter">C</span>Intenso e marcante</div>
+          <div class="quiz-option" data-val="Não sei / Quero ajuda" onclick="selectSingleAndNext(this, 8)"><span class="opt-letter">D</span>Não sei / Quero ajuda para descobrir</div>
+        </div>
+        <div class="quiz-actions">
+          <button class="btn-quiz-back" onclick="prevQuizStep(6)">Voltar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 8: O que mais importa (Max 3) -->
+    <div class="quiz-step" id="qstep-8">
+      <div class="quiz-content">
+        <div class="quiz-header">
+          <span class="quiz-number">8</span>
+          <h2>O que mais importa para você na hora de escolher um perfume?*</h2>
+        </div>
+        <p class="quiz-desc">Escolha até 3 opções.</p>
+        <div class="quiz-options-container multi-select max-3" data-id="quiz_importa">
+          <div class="quiz-option" data-val="Boa fixação"><span class="opt-letter">A</span>Boa fixação (Durar bastante na pele)</div>
+          <div class="quiz-option" data-val="Boa projeção"><span class="opt-letter">B</span>Boa projeção (Ser percebido)</div>
+          <div class="quiz-option" data-val="Exclusividade"><span class="opt-letter">C</span>Exclusividade (Não ter um cheiro comum)</div>
+          <div class="quiz-option" data-val="Versatilidade"><span class="opt-letter">D</span>Versatilidade (Para diferentes ocasiões)</div>
+          <div class="quiz-option" data-val="Receber elogios"><span class="opt-letter">E</span>Receber elogios</div>
+          <div class="quiz-option" data-val="Qualidade e sofisticação"><span class="opt-letter">F</span>Qualidade e sofisticação do aroma</div>
+          <div class="quiz-option" data-val="Bom custo-benefício"><span class="opt-letter">G</span>Bom custo-benefício</div>
+        </div>
+        <div class="quiz-actions">
+          <button class="btn-quiz-ok" onclick="nextQuizStep(9)">OK</button>
+          <button class="btn-quiz-back" onclick="prevQuizStep(7)">Voltar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 9: Investimento (Single) -->
+    <div class="quiz-step" id="qstep-9">
+      <div class="quiz-content">
+        <div class="quiz-header">
+          <span class="quiz-number">9</span>
+          <h2>Quanto você pretende investir no seu próximo perfume?*</h2>
+        </div>
+        <p class="quiz-desc">Isso nos ajuda a selecionar opções que façam sentido para você.</p>
+        <div class="quiz-options-container single-select" data-id="quiz_orcamento">
+          <div class="quiz-option" data-val="Até 250,00" onclick="selectSingleAndNext(this, 10)">Até R$ 250,00</div>
+          <div class="quiz-option" data-val="De 250 a 350" onclick="selectSingleAndNext(this, 10)">De R$ 250,00 a R$ 350,00</div>
+          <div class="quiz-option" data-val="De 350 a 500" onclick="selectSingleAndNext(this, 10)">De R$ 350,00 a R$ 500,00</div>
+          <div class="quiz-option" data-val="De 500 a 800" onclick="selectSingleAndNext(this, 10)">De R$ 500,00 a R$ 800,00</div>
+          <div class="quiz-option" data-val="De 800 a 1.200" onclick="selectSingleAndNext(this, 10)">De R$ 800,00 a R$ 1.200,00</div>
+          <div class="quiz-option" data-val="Acima de 1.200" onclick="selectSingleAndNext(this, 10)">Acima de R$ 1.200,00</div>
+        </div>
+        <div class="quiz-actions">
+          <button class="btn-quiz-back" onclick="prevQuizStep(8)">Voltar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 10: Lead Capture & Submit -->
+    <div class="quiz-step" id="qstep-10">
+      <div class="quiz-content">
+        <div class="quiz-header">
+          <span class="quiz-number">10</span>
+          <h2>Para onde enviamos sua curadoria exclusiva?*</h2>
+        </div>
+        <p class="quiz-desc">Nossa equipe analisará seu perfil e enviará as melhores opções diretamente para você.</p>
+        
+        <div class="quiz-input-group">
+          <label>WhatsApp (com DDD)*</label>
+          <input type="tel" id="quiz_whatsapp" placeholder="(11) 99999-9999" autocomplete="off">
+        </div>
+        <div class="quiz-input-group" style="margin-top: 1.5rem;">
+          <label>E-mail*</label>
+          <input type="email" id="quiz_email" placeholder="seuemail@exemplo.com" autocomplete="off" onkeypress="if(event.key==='Enter') submitQuiz()">
+        </div>
+
+        <div class="quiz-actions">
+          <button class="btn-quiz-submit" id="btnSubmitQuiz" onclick="submitQuiz()">Receber Minha Curadoria</button>
+          <button class="btn-quiz-back" onclick="prevQuizStep(9)">Voltar</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Step 11: Sucesso -->
+    <div class="quiz-step" id="qstep-11" style="text-align: center;">
+      <div class="quiz-content" style="align-items: center;">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" style="margin-bottom: 2rem;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        <h2 style="font-family: var(--font-serif); color: var(--olive-green); font-size: 2.5rem; margin-bottom: 1rem;">Tudo Certo!</h2>
+        <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 500px; margin-bottom: 2rem;">Recebemos suas preferências. Nossa equipe fará uma seleção impecável e entrará em contato em breve com o seu orçamento.</p>
+        <button class="btn-quiz-start" onclick="closeQuiz()">Explorar Catálogo</button>
+      </div>
+    </div>
+
+  </div> <!-- End Quiz Overlay -->
+
+  <!-- Modal de Pedido de Orçamento do Catálogo -->
+  <div class="modal-overlay" id="orcamentoModal">
+    <div class="modal-card" style="max-width: 500px; flex-direction: column;">
+      <button class="modal-close" onclick="closeOrcamentoModal()">&times;</button>
+      <div style="padding: 2.5rem; background: var(--bg-cream);">
+        <h2 style="font-family: var(--font-serif); color: var(--olive-green); font-size: 2rem; margin-bottom: 0.5rem;">Solicitar Orçamento</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Envie sua seleção de perfumes para nossa equipe.</p>
+        
+        <div class="quiz-input-group" style="margin-bottom: 1rem;">
+          <label style="color: var(--olive-green); font-weight: bold; font-size: 0.8rem;">Seu Nome</label>
+          <input type="text" id="cat_nome" placeholder="Digite seu nome" style="border-color: var(--olive-medium); color: var(--olive-green);">
+        </div>
+        <div class="quiz-input-group" style="margin-bottom: 1rem;">
+          <label style="color: var(--olive-green); font-weight: bold; font-size: 0.8rem;">WhatsApp</label>
+          <input type="tel" id="cat_whatsapp" placeholder="(11) 99999-9999" style="border-color: var(--olive-medium); color: var(--olive-green);">
+        </div>
+        
+        <button class="btn-quiz-submit" style="width: 100%; margin-top: 1rem;" id="btnSubmitCat" onclick="submitCatOrcamento()">Enviar Solicitação</button>
+      </div>
+    </div>
   </div>
 
-  <!-- Header -->
+
+  <!-- Header / Top Bar -->
   <header class="navbar" id="navbar">
     <div class="nav-brand" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
       <img src="Logo Duchi & Co. letra branca.png" alt="Duchi & Co." class="nav-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -45,7 +314,10 @@
     </div>
 
     <div class="nav-actions">
-      <button class="nav-btn" id="favoritesFilterBtn">
+      <!-- Botão para pedir orçamento dos selecionados -->
+      <button class="btn-quote-nav" id="btnRequestQuoteNav" onclick="openOrcamentoModal()">Pedir Orçamento</button>
+
+      <button class="nav-btn" id="favoritesFilterBtn" title="Ver minha seleção">
         <svg class="heart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
         <span class="badge" id="favCountBadge">0</span>
       </button>
@@ -54,11 +326,12 @@
 
   <!-- Hero Section -->
   <section class="hero">
-    <div class="hero-tag">COLEÇÃO EXCLUSIVA</div>
-    <h1 class="hero-title">A Arte da Alta Perfumaria</h1>
-    <p class="hero-description">
-      Explore nosso acervo de <strong>300 fragrâncias consagradas</strong>. Refine sua busca e encontre a assinatura olfativa perfeita para cada momento.
+    <div class="hero-tag">A ARTE DA ALTA PERFUMARIA</div>
+    <h1 class="hero-title">Encontre sua assinatura olfativa</h1>
+    <p class="hero-description" style="margin-bottom: 2rem;">
+      Não sabe por onde começar? Deixe nossa inteligência encontrar o perfume ideal para você.
     </p>
+    <button class="btn-quiz-hero" onclick="openQuiz()">Começar Curadoria</button>
   </section>
 
   <!-- Filter Console -->
@@ -66,7 +339,7 @@
     <div class="filter-console-header">
       <div class="console-title">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-        <h2>Filtros de Curadoria</h2>
+        <h2>Filtros do Catálogo</h2>
       </div>
       <button id="resetFiltersBtn" class="btn-reset">Limpar Seleção</button>
     </div>
