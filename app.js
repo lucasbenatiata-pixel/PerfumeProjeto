@@ -1,10 +1,10 @@
 /**
  * NOIR PARFUMS - Recommendation Engine & Interactive Filtering
- * Real multi-faceted filtering + Accent-Insensitive Instant Search
+ * Agora 100% blindado contra surtos de Encoding do Windows.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // DOM Elements
+  // Pegando os elementos do HTML
   const catalogGrid = document.getElementById('catalogGrid');
   const searchInput = document.getElementById('searchInput');
   const clearSearchBtn = document.getElementById('clearSearchBtn');
@@ -22,24 +22,25 @@ document.addEventListener('DOMContentLoaded', () => {
   const paginationWrapper = document.getElementById('paginationWrapper');
   const favoritesFilterBtn = document.getElementById('favoritesFilterBtn');
   const favCountBadge = document.getElementById('favCountBadge');
-  const toast = document.getElementById('toast');
-
-  // Modal Elements
+  
+  // Elementos do Modal
   const modal = document.getElementById('perfumeModal');
   const modalBody = document.getElementById('modalBody');
   const modalCloseBtn = document.getElementById('modalCloseBtn');
+  const toast = document.getElementById('toast');
 
-  // Verify dataset
-  const database = (typeof window.PERFUMES_DB !== 'undefined' && Array.isArray(window.PERFUMES_DB)) 
-    ? window.PERFUMES_DB 
-    : (typeof PERFUMES_DB !== 'undefined' ? PERFUMES_DB : []);
-
-  // Update total stats
-  if (totalPerfumesStat) {
-    totalPerfumesStat.textContent = database.length;
+  // Verificação robusta do Banco de Dados (Para o navegador não chorar)
+  let database = [];
+  if (typeof window.PERFUMES_DB !== 'undefined' && Array.isArray(window.PERFUMES_DB)) {
+    database = window.PERFUMES_DB;
+  } else if (typeof PERFUMES_DB !== 'undefined' && Array.isArray(PERFUMES_DB)) {
+    database = PERFUMES_DB;
   }
 
-  // State Management
+  // Atualiza as estatísticas do topo
+  if (totalPerfumesStat) totalPerfumesStat.textContent = database.length;
+
+  // Estado Atual do Sistema
   const ITEMS_PER_PAGE = 24;
   let currentPage = 1;
   let searchQuery = '';
@@ -53,11 +54,11 @@ document.addEventListener('DOMContentLoaded', () => {
     intensity: []
   };
 
-  // LocalStorage for Favorites
+  // Puxando seus favoritos do abismo do LocalStorage
   let favorites = JSON.parse(localStorage.getItem('noir_favorites') || '[]');
   updateFavBadge();
 
-  // Helper: Normalize String (Remove Accents & Lowercase)
+  // Função anti-surto para limpar acentos (agora usando regex segura e escapada)
   function normalizeText(text) {
     if (!text) return '';
     return text
@@ -69,10 +70,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --------------------------------------------------------------------------
-  // EVENT LISTENERS & CHIP BINDINGS
+  // EVENTOS DE CLIQUE DOS FILTROS (CHIPS)
   // --------------------------------------------------------------------------
-  
-  // Chip Click Handlers
   document.querySelectorAll('.chip-group').forEach(group => {
     const filterType = group.dataset.filter;
     group.querySelectorAll('.chip').forEach(chip => {
@@ -86,77 +85,85 @@ document.addEventListener('DOMContentLoaded', () => {
           activeFilters[filterType].push(val);
         }
 
-        currentPage = 1;
+        currentPage = 1; // Reseta a paginação
         renderActiveTags();
         renderCatalog();
       });
     });
   });
 
-  // Reset All Filters
+  // Botão Mágico de Resetar Tudo
   function resetAllFilters() {
-    activeFilters = {
-      gender: [],
-      family: [],
-      occasion: [],
-      intensity: []
-    };
+    activeFilters = { gender: [], family: [], occasion: [], intensity: [] };
     document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
     searchInput.value = '';
     searchQuery = '';
-    clearSearchBtn.style.display = 'none';
+    if (clearSearchBtn) clearSearchBtn.style.display = 'none';
     showFavoritesOnly = false;
-    favoritesFilterBtn.classList.remove('active');
+    if (favoritesFilterBtn) favoritesFilterBtn.classList.remove('active');
+    
     currentPage = 1;
     renderActiveTags();
     renderCatalog();
-    showToast('Filtros restaurados');
+    showToast('Tudo limpo! Voltamos à estaca zero.');
   }
 
   if (resetFiltersBtn) resetFiltersBtn.addEventListener('click', resetAllFilters);
   if (emptyResetBtn) emptyResetBtn.addEventListener('click', resetAllFilters);
 
-  // Search Input Handlers
-  searchInput.addEventListener('input', (e) => {
-    searchQuery = e.target.value;
-    clearSearchBtn.style.display = searchQuery.trim().length > 0 ? 'block' : 'none';
-    currentPage = 1;
-    renderCatalog();
-  });
+  // --------------------------------------------------------------------------
+  // BARRA DE BUSCA
+  // --------------------------------------------------------------------------
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      if (clearSearchBtn) clearSearchBtn.style.display = searchQuery.trim().length > 0 ? 'block' : 'none';
+      currentPage = 1;
+      renderCatalog();
+    });
+  }
 
-  clearSearchBtn.addEventListener('click', () => {
-    searchInput.value = '';
-    searchQuery = '';
-    clearSearchBtn.style.display = 'none';
-    currentPage = 1;
-    renderCatalog();
-    searchInput.focus();
-  });
-
-  // Sort Selection
-  sortSelect.addEventListener('change', (e) => {
-    currentSort = e.target.value;
-    currentPage = 1;
-    renderCatalog();
-  });
-
-  // Favorites Filter Toggle
-  favoritesFilterBtn.addEventListener('click', () => {
-    showFavoritesOnly = !showFavoritesOnly;
-    favoritesFilterBtn.classList.toggle('active', showFavoritesOnly);
-    currentPage = 1;
-    renderCatalog();
-    showToast(showFavoritesOnly ? 'Exibindo apenas seus favoritos' : 'Exibindo todos os perfumes');
-  });
-
-  // Load More Button
-  loadMoreBtn.addEventListener('click', () => {
-    currentPage += 1;
-    renderCatalog(true);
-  });
+  if (clearSearchBtn) {
+    clearSearchBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      searchQuery = '';
+      clearSearchBtn.style.display = 'none';
+      currentPage = 1;
+      renderCatalog();
+      searchInput.focus();
+    });
+  }
 
   // --------------------------------------------------------------------------
-  // ACTIVE TAGS UI
+  // ORDENAÇÃO E FAVORITOS
+  // --------------------------------------------------------------------------
+  if (sortSelect) {
+    sortSelect.addEventListener('change', (e) => {
+      currentSort = e.target.value;
+      currentPage = 1;
+      renderCatalog();
+    });
+  }
+
+  if (favoritesFilterBtn) {
+    favoritesFilterBtn.addEventListener('click', () => {
+      showFavoritesOnly = !showFavoritesOnly;
+      favoritesFilterBtn.classList.toggle('active', showFavoritesOnly);
+      currentPage = 1;
+      renderCatalog();
+      showToast(showFavoritesOnly ? 'Modo VIP: Só seus favoritos.' : 'Mostrando todo o acervo.');
+    });
+  }
+
+  if (loadMoreBtn) {
+    loadMoreBtn.addEventListener('click', () => {
+      currentPage += 1;
+      renderCatalog(true);
+    });
+  }
+
+  // --------------------------------------------------------------------------
+  // TAGS VISUAIS NO TOPO
   // --------------------------------------------------------------------------
   function renderActiveTags() {
     const allActive = [];
@@ -167,17 +174,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (allActive.length === 0) {
-      activeTagsBar.style.display = 'none';
-      activeTagsList.innerHTML = '';
+      if (activeTagsBar) activeTagsBar.style.display = 'none';
+      if (activeTagsList) activeTagsList.innerHTML = '';
       return;
     }
 
-    activeTagsBar.style.display = 'flex';
-    activeTagsList.innerHTML = allActive.map(item => `
-      <span class="active-tag-chip" onclick="removeActiveFilter('${item.type}', '${item.val}')">
-        ${item.val} <span class="close-x">&times;</span>
-      </span>
-    `).join('');
+    if (activeTagsBar) activeTagsBar.style.display = 'flex';
+    if (activeTagsList) {
+      activeTagsList.innerHTML = allActive.map(item => `
+        <span class="active-tag-chip" onclick="removeActiveFilter('${item.type}', '${item.val}')">
+          ${item.val} <span class="close-x">&times;</span>
+        </span>
+      `).join('');
+    }
   }
 
   window.removeActiveFilter = function(type, val) {
@@ -192,48 +201,34 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // --------------------------------------------------------------------------
-  // CORE FILTERING & SEARCH LOGIC
+  // O CÉREBRO DA OPERAÇÃO (FILTRO + ORDENAÇÃO)
   // --------------------------------------------------------------------------
   function filterAndSortData() {
     const qNorm = normalizeText(searchQuery);
 
     let list = database.filter(p => {
-      // 1. Favorites check
-      if (showFavoritesOnly && !favorites.includes(p.id)) {
-        return false;
-      }
+      // Favoritos
+      if (showFavoritesOnly && !favorites.includes(p.id)) return false;
 
-      // 2. Search query check (accent-insensitive across all perfume data)
+      // Busca por Texto Livre
       if (qNorm) {
         const fullContent = normalizeText(`
-          ${p.name} 
-          ${p.brand} 
-          ${p.family} 
-          ${p.gender} 
-          ${p.intensity} 
-          ${p.topNotes} 
-          ${p.heartNotes} 
-          ${p.baseNotes} 
-          ${p.occasions.join(' ')} 
-          ${p.description}
+          ${p.name} ${p.brand} ${p.family} ${p.gender} 
+          ${p.intensity} ${p.topNotes} ${p.heartNotes} 
+          ${p.baseNotes} ${p.occasions.join(' ')}
         `);
-        if (!fullContent.includes(qNorm)) {
-          return false;
-        }
+        if (!fullContent.includes(qNorm)) return false;
       }
 
-      // 3. Gender Filter (OR within Gender)
+      // Gênero
       if (activeFilters.gender.length > 0) {
         const matchesGender = activeFilters.gender.some(g => {
-          if (g === p.gender) return true;
-          if (p.gender === 'Unissex') return true;
-          if (g === 'Unissex') return true;
-          return false;
+          return g === p.gender || p.gender === 'Unissex' || g === 'Unissex';
         });
         if (!matchesGender) return false;
       }
 
-      // 4. Family Filter (OR within Family)
+      // Família
       if (activeFilters.family.length > 0) {
         const pFamNorm = normalizeText(p.family);
         const matchesFamily = activeFilters.family.some(f => {
@@ -243,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!matchesFamily) return false;
       }
 
-      // 5. Occasion Filter (OR within Occasion)
+      // Ocasião
       if (activeFilters.occasion.length > 0) {
         const pOccsNorm = p.occasions.map(o => normalizeText(o));
         const matchesOccasion = activeFilters.occasion.some(occ => {
@@ -253,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!matchesOccasion) return false;
       }
 
-      // 6. Intensity Filter (OR within Intensity)
+      // Intensidade
       if (activeFilters.intensity.length > 0) {
         const pInteNorm = normalizeText(p.intensity);
         const matchesIntensity = activeFilters.intensity.some(inte => {
@@ -263,10 +258,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!matchesIntensity) return false;
       }
 
-      return true;
+      return true; // Passou na blitz!
     });
 
-    // Sort Logic
+    // Ordenação
     list.sort((a, b) => {
       if (currentSort === 'salesRank') return a.salesRank - b.salesRank;
       if (currentSort === 'rating') return b.rating - a.rating;
@@ -279,55 +274,64 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --------------------------------------------------------------------------
-  // CATALOG RENDERING
+  // RENDERIZAÇÃO DOS CARDS
   // --------------------------------------------------------------------------
   function renderCatalog(append = false) {
-    if (!database || database.length === 0) {
-      catalogGrid.innerHTML = '<p style="color: red; padding: 2rem;">Erro ao carregar banco de perfumes.</p>';
+    if (!catalogGrid) return;
+
+    if (database.length === 0) {
+      catalogGrid.innerHTML = '<p style="color: #ff4b72; padding: 2rem; font-weight: bold;">Oops! O banco de dados (perfumes.js) não foi carregado corretamente.</p>';
       return;
     }
 
     const filteredList = filterAndSortData();
-    resultsCount.textContent = filteredList.length;
+    if (resultsCount) resultsCount.textContent = filteredList.length;
 
-    // Handle Empty State
+    // Estado Vazio
     if (filteredList.length === 0) {
       catalogGrid.innerHTML = '';
-      emptyState.style.display = 'block';
-      paginationWrapper.style.display = 'none';
+      if (emptyState) emptyState.style.display = 'block';
+      if (paginationWrapper) paginationWrapper.style.display = 'none';
 
-      if (showFavoritesOnly) {
-        emptyStateMsg.textContent = 'Você ainda não adicionou nenhum perfume aos favoritos. Clique no ícone de coração ♥ nos perfumes para salvá-los aqui.';
-      } else if (searchQuery) {
-        emptyStateMsg.textContent = `Nenhum perfume encontrado para "${searchQuery}". Verifique a ortografia ou limpe os filtros.`;
-      } else {
-        emptyStateMsg.textContent = 'Nenhum perfume corresponde exatamente à combinação de filtros selecionada.';
+      if (emptyStateMsg) {
+        if (showFavoritesOnly) {
+          emptyStateMsg.textContent = 'Ainda não há favoritos aqui. Clique no coraçãozinho em algum perfume para salvá-lo!';
+        } else if (searchQuery) {
+          emptyStateMsg.textContent = `Nada encontrado para "${searchQuery}". Talvez esse perfume seja de um universo paralelo.`;
+        } else {
+          emptyStateMsg.textContent = 'Sua combinação de filtros foi exigente demais. Tente remover alguma coisa.';
+        }
       }
       return;
     } else {
-      emptyState.style.display = 'none';
+      if (emptyState) emptyState.style.display = 'none';
     }
 
-    // Pagination slice
+    // Paginação
     const totalToShow = currentPage * ITEMS_PER_PAGE;
     const itemsToRender = filteredList.slice(0, totalToShow);
     const remainingCount = Math.max(0, filteredList.length - itemsToRender.length);
 
-    if (remainingCount > 0) {
-      paginationWrapper.style.display = 'block';
-      loadMoreRemaining.textContent = remainingCount;
-    } else {
-      paginationWrapper.style.display = 'none';
+    if (paginationWrapper && loadMoreRemaining) {
+      if (remainingCount > 0) {
+        paginationWrapper.style.display = 'block';
+        loadMoreRemaining.textContent = remainingCount;
+      } else {
+        paginationWrapper.style.display = 'none';
+      }
     }
 
-    // Build Cards HTML
+    // Criando os HTML Cards
     const cardsHtml = itemsToRender.map(p => {
       const isFav = favorites.includes(p.id);
+      const safeIntensity = p.intensity ? p.intensity.split('/')[0].trim() : '';
+      const safeOccasion = p.occasions && p.occasions[0] ? p.occasions[0] : 'Elegante';
+      const safeNotes = p.topNotes ? p.topNotes.split(',').slice(0, 3).join(', ') : 'Exclusivas';
 
       return `
         <div class="card" onclick="openModal(${p.id})">
           <div class="card-media">
-            <span class="card-badge-rank">#${p.salesRank} GLOBAL</span>
+            <span class="card-badge-rank">#${p.salesRank || '?'} GLOBAL</span>
             <button class="card-fav-btn ${isFav ? 'favorited' : ''}" 
                     title="${isFav ? 'Remover dos Favoritos' : 'Salvar nos Favoritos'}" 
                     onclick="toggleFavorite(event, ${p.id})">
@@ -340,17 +344,17 @@ document.addEventListener('DOMContentLoaded', () => {
             <h3 class="card-name">${p.name}</h3>
             
             <div class="card-meta">
-              <span class="card-stars">★ ${p.rating.toFixed(1)}</span>
-              <span>${p.gender} • ${p.intensity.split('/')[0].trim()}</span>
+              <span class="card-stars">★ ${p.rating ? p.rating.toFixed(1) : 'N/A'}</span>
+              <span>${p.gender} • ${safeIntensity}</span>
             </div>
 
             <p class="card-notes">
-              <strong>Notas:</strong> ${p.topNotes.split(',').slice(0, 3).join(', ')}...
+              <strong>Notas:</strong> ${safeNotes}...
             </p>
 
             <div class="card-tags">
               <span class="tag-badge">${p.family}</span>
-              <span class="tag-badge">${p.occasions[0] || 'Elegante'}</span>
+              <span class="tag-badge">${safeOccasion}</span>
             </div>
           </div>
         </div>
@@ -361,13 +365,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --------------------------------------------------------------------------
-  // FAVORITES LOGIC
+  // SISTEMA DE FAVORITOS
   // --------------------------------------------------------------------------
   window.toggleFavorite = function(e, id) {
-    e.stopPropagation();
+    e.stopPropagation(); // Evita abrir o modal ao clicar no coração
     if (favorites.includes(id)) {
       favorites = favorites.filter(favId => favId !== id);
-      showToast('Removido dos favoritos');
+      showToast('Removido dos favoritos 💔');
     } else {
       favorites.push(id);
       showToast('Adicionado aos favoritos ♥');
@@ -378,13 +382,11 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   function updateFavBadge() {
-    if (favCountBadge) {
-      favCountBadge.textContent = favorites.length;
-    }
+    if (favCountBadge) favCountBadge.textContent = favorites.length;
   }
 
   // --------------------------------------------------------------------------
-  // MODAL DETAILS
+  // O FAMOSO MODAL DETALHADO
   // --------------------------------------------------------------------------
   window.openModal = function(id) {
     const p = database.find(item => item.id === id);
@@ -402,7 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         <h2 class="modal-title">${p.name}</h2>
         <div class="modal-rating-row">
-          <span style="color: #ffbe3b; font-weight: bold;">★ ${p.rating.toFixed(1)} / 5.0</span>
+          <span style="color: #ffbe3b; font-weight: bold;">★ ${p.rating ? p.rating.toFixed(1) : 'N/A'} / 5.0</span>
           <span>•</span>
           <span>${p.gender}</span>
           <span>•</span>
@@ -426,38 +428,41 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         </div>
 
-        <div class="modal-tags">
+        <div class="modal-tags" style="margin-top: auto; display: flex; flex-wrap: wrap; gap: 5px;">
           <span class="tag-badge" style="border-color: var(--gold-primary); color: var(--gold-light);">Família: ${p.family}</span>
-          ${p.occasions.map(occ => `<span class="tag-badge">${occ}</span>`).join('')}
+          ${(p.occasions || []).map(occ => `<span class="tag-badge">${occ}</span>`).join('')}
         </div>
       </div>
     `;
 
     modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden'; // Trava o scroll do fundo
   };
 
-  modalCloseBtn.addEventListener('click', closeModal);
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal();
-  });
+  if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeModal);
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+  }
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.classList.contains('active')) {
+    if (e.key === 'Escape' && modal && modal.classList.contains('active')) {
       closeModal();
     }
   });
 
   function closeModal() {
-    modal.classList.remove('active');
+    if (modal) modal.classList.remove('active');
     document.body.style.overflow = '';
   }
 
   // --------------------------------------------------------------------------
-  // TOAST NOTIFICATIONS
+  // MENSAGENS TOAST
   // --------------------------------------------------------------------------
   let toastTimer;
   function showToast(msg) {
+    if (!toast) return;
     clearTimeout(toastTimer);
     toast.textContent = msg;
     toast.classList.add('active');
@@ -466,6 +471,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 2400);
   }
 
-  // Initial Run
+  // Dá a largada na aplicação!
   renderCatalog();
 });
