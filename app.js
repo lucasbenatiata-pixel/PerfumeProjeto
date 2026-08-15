@@ -2,14 +2,13 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // ----- PRELOADER LOGIC -----
   window.addEventListener('load', () => {
-    // Dá um tempinho extra para exibir a animação linda do perfume espirrando
     setTimeout(() => {
       const preloader = document.getElementById('preloader');
       if(preloader) {
         preloader.classList.add('hidden');
-        setTimeout(() => preloader.style.display = 'none', 800); // remove do DOM
+        setTimeout(() => preloader.style.display = 'none', 800);
       }
-    }, 2000); 
+    }, 1500); 
   });
 
   // Efeitos Navbar Scrolled
@@ -36,10 +35,11 @@ document.addEventListener('DOMContentLoaded', () => {
   let searchQuery = '';
   let currentSort = 'salesRank';
   
-  let favorites = JSON.parse(localStorage.getItem('terra_favorites') || '[]');
+  let favorites = JSON.parse(localStorage.getItem('duchi_favorites') || '[]');
   let showFavorites = false;
 
-  document.getElementById('favCountBadge').textContent = favorites.length;
+  const favBadge = document.getElementById('favCountBadge');
+  if(favBadge) favBadge.textContent = favorites.length;
 
   function normalize(str) {
     return str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase() : '';
@@ -63,39 +63,55 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Search
-  searchInput.addEventListener('input', e => {
-    searchQuery = e.target.value;
-    clearSearchBtn.style.display = searchQuery ? 'block' : 'none';
-    currentPage = 1; render();
-  });
+  if(searchInput) {
+    searchInput.addEventListener('input', e => {
+      searchQuery = e.target.value;
+      clearSearchBtn.style.display = searchQuery ? 'block' : 'none';
+      currentPage = 1; render();
+    });
+  }
   
-  clearSearchBtn.addEventListener('click', () => {
-    searchInput.value = ''; searchQuery = ''; clearSearchBtn.style.display = 'none';
-    currentPage = 1; render();
-  });
+  if(clearSearchBtn) {
+    clearSearchBtn.addEventListener('click', () => {
+      searchInput.value = ''; searchQuery = ''; clearSearchBtn.style.display = 'none';
+      currentPage = 1; render();
+    });
+  }
 
   // Sort & Favs
-  sortSelect.addEventListener('change', e => { currentSort = e.target.value; currentPage = 1; render(); });
-  document.getElementById('favoritesFilterBtn').addEventListener('click', function() {
-    showFavorites = !showFavorites;
-    this.classList.toggle('active');
-    currentPage = 1; render();
-  });
+  if(sortSelect) {
+    sortSelect.addEventListener('change', e => { currentSort = e.target.value; currentPage = 1; render(); });
+  }
+  
+  const favFilterBtn = document.getElementById('favoritesFilterBtn');
+  if(favFilterBtn) {
+    favFilterBtn.addEventListener('click', function() {
+      showFavorites = !showFavorites;
+      this.classList.toggle('active');
+      currentPage = 1; render();
+    });
+  }
 
-  document.getElementById('resetFiltersBtn').addEventListener('click', resetAll);
-  document.getElementById('emptyResetBtn').addEventListener('click', resetAll);
+  const resetBtn = document.getElementById('resetFiltersBtn');
+  const emptyResetBtn = document.getElementById('emptyResetBtn');
+  if(resetBtn) resetBtn.addEventListener('click', resetAll);
+  if(emptyResetBtn) emptyResetBtn.addEventListener('click', resetAll);
   
   function resetAll() {
     activeFilters = { gender: [], family: [], occasion: [], intensity: [] };
     document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    searchInput.value = ''; searchQuery = ''; clearSearchBtn.style.display='none';
-    showFavorites = false; document.getElementById('favoritesFilterBtn').classList.remove('active');
+    if(searchInput) searchInput.value = ''; 
+    searchQuery = ''; 
+    if(clearSearchBtn) clearSearchBtn.style.display='none';
+    showFavorites = false; 
+    if(favFilterBtn) favFilterBtn.classList.remove('active');
     currentPage = 1; render();
   }
 
   window.removeActiveFilter = (type, val) => {
     activeFilters[type] = activeFilters[type].filter(v => v !== val);
-    document.querySelector(`.chip-group[data-filter="${type}"] .chip[data-value="${val}"]`).classList.remove('active');
+    const chip = document.querySelector(`.chip-group[data-filter="${type}"] .chip[data-value="${val}"]`);
+    if(chip) chip.classList.remove('active');
     currentPage = 1; render();
   };
 
@@ -108,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
       activeTagsBar.style.display = 'flex';
       activeTagsList.innerHTML = tags.map(t => `<span class="active-tag-chip" onclick="removeActiveFilter('${t.k}','${t.val}')">${t.val} &times;</span>`).join('');
     } else {
-      activeTagsBar.style.display = 'none';
+      if(activeTagsBar) activeTagsBar.style.display = 'none';
     }
 
     let filtered = database.filter(p => {
@@ -119,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if(!txt.includes(qNorm)) return false;
       }
       
-      if(activeFilters.gender.length && !activeFilters.gender.some(g => g === p.gender || p.gender==='Unissex')) return false;
+      if(activeFilters.gender.length && !activeFilters.gender.some(g => g === p.gender || p.gender==='Unissex' || g==='Unissex')) return false;
       if(activeFilters.family.length && !activeFilters.family.some(f => normalize(p.family).includes(normalize(f)))) return false;
       if(activeFilters.occasion.length && !activeFilters.occasion.some(o => p.occasions.map(normalize).some(po => po.includes(normalize(o))))) return false;
       if(activeFilters.intensity.length && !activeFilters.intensity.includes(p.intensity)) return false;
@@ -134,77 +150,103 @@ document.addEventListener('DOMContentLoaded', () => {
       return a.name.localeCompare(b.name);
     });
 
-    resultsCount.textContent = filtered.length;
+    if(resultsCount) resultsCount.textContent = filtered.length;
     
     const emptyState = document.getElementById('emptyState');
     if(filtered.length === 0) {
-      catalogGrid.innerHTML = '';
-      emptyState.style.display = 'block';
-      document.getElementById('paginationWrapper').style.display = 'none';
+      if(catalogGrid) catalogGrid.innerHTML = '';
+      if(emptyState) emptyState.style.display = 'block';
+      const pagWrap = document.getElementById('paginationWrapper');
+      if(pagWrap) pagWrap.style.display = 'none';
       return;
     }
-    emptyState.style.display = 'none';
+    if(emptyState) emptyState.style.display = 'none';
 
     const itemsToShow = filtered.slice(0, currentPage * ITEMS_PER_PAGE);
-    document.getElementById('paginationWrapper').style.display = itemsToShow.length < filtered.length ? 'block' : 'none';
-    document.getElementById('loadMoreRemaining').textContent = filtered.length - itemsToShow.length;
+    const pagWrap = document.getElementById('paginationWrapper');
+    if(pagWrap) pagWrap.style.display = itemsToShow.length < filtered.length ? 'block' : 'none';
+    
+    const rem = document.getElementById('loadMoreRemaining');
+    if(rem) rem.textContent = filtered.length - itemsToShow.length;
 
-    catalogGrid.innerHTML = itemsToShow.map(p => `
-      <div class="card" onclick="openModal(${p.id})">
-        <div class="card-media">
-          <span class="card-badge-rank">#${p.salesRank} GLOBAL</span>
-          <button class="card-fav-btn ${favorites.includes(p.id) ? 'favorited' : ''}" onclick="toggleFav(event, ${p.id})">♥</button>
-          <img src="${p.image}" loading="lazy">
+    if(catalogGrid) {
+      catalogGrid.innerHTML = itemsToShow.map(p => {
+        const isFav = favorites.includes(p.id);
+        const heartSVG = `<svg viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`;
+        
+        return `
+        <div class="card" onclick="openModal(${p.id})">
+          <div class="card-media">
+            <span class="card-badge-rank">#${p.salesRank}</span>
+            <button class="card-fav-btn ${isFav ? 'favorited' : ''}" onclick="toggleFav(event, ${p.id})">
+              ${heartSVG}
+            </button>
+            <img src="${p.image}" loading="lazy" alt="${p.name}">
+          </div>
+          <div class="card-body">
+            <div class="card-brand">${p.brand}</div>
+            <h3 class="card-name">${p.name}</h3>
+            <div class="card-meta"><span>★ ${p.rating.toFixed(1)}</span><span>${p.intensity.split('/')[0]}</span></div>
+            <div class="card-tags"><span class="tag-badge">${p.family}</span><span class="tag-badge">${p.gender}</span></div>
+          </div>
         </div>
-        <div class="card-body">
-          <div class="card-brand">${p.brand}</div>
-          <h3 class="card-name">${p.name}</h3>
-          <div class="card-meta"><span>★ ${p.rating.toFixed(1)}</span><span>${p.intensity.split('/')[0]}</span></div>
-          <div class="card-tags"><span class="tag-badge">${p.family}</span><span class="tag-badge">${p.gender}</span></div>
-        </div>
-      </div>
-    `).join('');
+      `}).join('');
+    }
   }
 
-  loadMoreBtn.addEventListener('click', () => { currentPage++; render(); });
+  if(loadMoreBtn) {
+    loadMoreBtn.addEventListener('click', () => { currentPage++; render(); });
+  }
 
   window.toggleFav = (e, id) => {
     e.stopPropagation();
-    if(favorites.includes(id)) { favorites = favorites.filter(x => x !== id); showToast('Removido dos favoritos 💔');}
-    else { favorites.push(id); showToast('Salvo nos favoritos ♥');}
-    localStorage.setItem('terra_favorites', JSON.stringify(favorites));
-    document.getElementById('favCountBadge').textContent = favorites.length;
+    if(favorites.includes(id)) { 
+      favorites = favorites.filter(x => x !== id); 
+      showToast('Removido da sua coleção');
+    } else { 
+      favorites.push(id); 
+      showToast('Adicionado à sua coleção');
+    }
+    localStorage.setItem('duchi_favorites', JSON.stringify(favorites));
+    if(favBadge) favBadge.textContent = favorites.length;
     render();
   };
 
   window.openModal = id => {
     const p = database.find(x => x.id === id);
     document.getElementById('modalBody').innerHTML = `
-      <div class="modal-media"><img src="${p.image}"></div>
+      <div class="modal-media"><img src="${p.image}" alt="${p.name}"></div>
       <div class="modal-details">
         <div class="modal-brand">${p.brand}</div>
         <h2 class="modal-title">${p.name}</h2>
-        <p style="color:#d4af37; margin-bottom:15px; font-weight:bold;">★ ${p.rating} | Rank #${p.salesRank}</p>
+        <p style="color:var(--gold); margin-bottom:15px; font-weight:700; font-family:var(--font-sans); font-size:0.85rem;">
+          ★ ${p.rating.toFixed(1)} | RANKING #${p.salesRank} | ${p.gender.toUpperCase()}
+        </p>
         <p class="modal-desc">${p.description}</p>
         <div class="pyramid-box">
-          <div class="pyramid-row"><span class="lvl-name">Topo:</span><span class="lvl-notes">${p.topNotes}</span></div>
-          <div class="pyramid-row"><span class="lvl-name">Corpo:</span><span class="lvl-notes">${p.heartNotes}</span></div>
-          <div class="pyramid-row"><span class="lvl-name">Fundo:</span><span class="lvl-notes">${p.baseNotes}</span></div>
+          <div class="pyramid-row"><span class="lvl-name">Topo</span><span class="lvl-notes">${p.topNotes}</span></div>
+          <div class="pyramid-row"><span class="lvl-name">Corpo</span><span class="lvl-notes">${p.heartNotes}</span></div>
+          <div class="pyramid-row"><span class="lvl-name">Fundo</span><span class="lvl-notes">${p.baseNotes}</span></div>
         </div>
       </div>
     `;
-    modal.classList.add('active');
+    if(modal) modal.classList.add('active');
   };
 
-  document.getElementById('modalCloseBtn').addEventListener('click', () => modal.classList.remove('active'));
-  modal.addEventListener('click', e => { if(e.target === modal) modal.classList.remove('active'); });
+  const modClose = document.getElementById('modalCloseBtn');
+  if(modClose) modClose.addEventListener('click', () => modal.classList.remove('active'));
+  
+  if(modal) {
+    modal.addEventListener('click', e => { if(e.target === modal) modal.classList.remove('active'); });
+  }
 
   function showToast(msg) {
     const t = document.getElementById('toast');
-    t.textContent = msg; t.classList.add('active');
+    if(!t) return;
+    t.textContent = msg; 
+    t.classList.add('active');
     setTimeout(() => t.classList.remove('active'), 2500);
   }
 
-  // Init (wait for window load to let preloader shine)
   render();
 });

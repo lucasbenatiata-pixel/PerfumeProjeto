@@ -3,76 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CURADORIA do Terra | Alta Perfumaria</title>
+  <title>Duchi & Co. | Curadoria de Fragrâncias</title>
+  <meta name="description" content="O maior acervo de alta perfumaria selecionado pela Duchi & Co." />
   
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- PRELOADER COM ANIMAÇÃO DE ESPIRRO -->
+  <!-- PRELOADER COM MONOGRAMA DOURADO -->
   <div id="preloader" class="preloader">
-    <div class="perfume-anim-container">
-      <svg viewBox="0 0 100 100" class="bottle-svg">
-        <!-- Spray Drops Left -->
-        <circle cx="50" cy="20" r="1.5" class="drop drop-1" />
-        <circle cx="50" cy="20" r="1" class="drop drop-2" />
-        <circle cx="50" cy="20" r="2" class="drop drop-3" />
-        <circle cx="50" cy="20" r="1" class="drop drop-7" />
-        <!-- Spray Drops Right -->
-        <circle cx="50" cy="20" r="1.5" class="drop drop-4" />
-        <circle cx="50" cy="20" r="1" class="drop drop-5" />
-        <circle cx="50" cy="20" r="2" class="drop drop-6" />
-        <circle cx="50" cy="20" r="1" class="drop drop-8" />
-
-        <!-- Cap & Nozzle -->
-        <rect x="46" y="16" width="8" height="6" fill="#d4af37" rx="2"/>
-        <rect x="42" y="22" width="16" height="5" fill="#a27c24" rx="1"/>
-        
-        <!-- Bottle Body -->
-        <path d="M 35 27 Q 35 38 28 45 L 28 85 Q 28 92 35 92 L 65 92 Q 72 92 72 85 L 72 45 Q 65 38 65 27 Z" fill="rgba(212, 175, 55, 0.05)" stroke="#d4af37" stroke-width="2" />
-        
-        <!-- Liquid -->
-        <path d="M 29 55 L 71 55 L 71 85 Q 71 90 65 90 L 35 90 Q 29 90 29 85 Z" fill="rgba(212, 175, 55, 0.4)" />
-        
-        <!-- Shine -->
-        <path d="M 33 48 L 33 80" stroke="rgba(255,255,255,0.4)" stroke-width="2" stroke-linecap="round"/>
-      </svg>
+    <div class="preloader-logo-container">
+      <img src="Monograma D&Co. dourado.png" alt="Duchi & Co. Monograma" class="preloader-monogram" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+      <span class="preloader-fallback-text" style="display: none;">D&Co.</span>
     </div>
-    <h2 class="preloader-title">CURADORIA <span class="preloader-subtitle">do Terra</span></h2>
-    <p class="preloader-status">Vaporizando essências...</p>
+    <div class="preloader-line"></div>
+    <p class="preloader-status">Curadoria de Fragrâncias...</p>
   </div>
-
-  <!-- Ambient Glow Effects -->
-  <div class="ambient-glow"></div>
-  <div class="ambient-glow-secondary"></div>
 
   <!-- Header -->
   <header class="navbar" id="navbar">
     <div class="nav-brand" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
-      <span class="logo-symbol">✧</span>
-      <div class="logo-text-group">
-        <span class="logo-title">CURADORIA</span>
-        <span class="logo-subtitle">DO TERRA</span>
+      <img src="Logo Duchi & Co..png" alt="Duchi & Co." class="nav-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+      <div class="nav-logo-fallback" style="display: none;">
+        <span class="logo-title">DUCHI & CO.</span>
+        <span class="logo-subtitle">CURADORIA DE FRAGRÂNCIAS</span>
       </div>
     </div>
 
     <!-- Search Bar -->
     <div class="nav-search">
-      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
         <circle cx="11" cy="11" r="8"></circle>
         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
       </svg>
-      <input type="text" id="searchInput" placeholder="Pesquise por casa, notas (ex: Baunilha, Tabaco) ou nome..." autocomplete="off" />
+      <input type="text" id="searchInput" placeholder="Busque por essência, casa ou emoção..." autocomplete="off" />
       <button id="clearSearchBtn" class="clear-search-btn" title="Limpar">&times;</button>
     </div>
 
     <div class="nav-actions">
       <button class="nav-btn" id="favoritesFilterBtn">
-        <span class="heart-icon">♥</span>
+        <svg class="heart-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
         <span class="badge" id="favCountBadge">0</span>
       </button>
     </div>
@@ -80,25 +54,25 @@
 
   <!-- Hero Section -->
   <section class="hero">
-    <div class="hero-tag">A ARTE DA ALTA PERFUMARIA</div>
-    <h1 class="hero-title">Sua Assinatura Olfativa</h1>
+    <div class="hero-tag">COLEÇÃO EXCLUSIVA</div>
+    <h1 class="hero-title">A Arte da Alta Perfumaria</h1>
     <p class="hero-description">
-      Explore nosso acervo de <strong>300 fragrâncias</strong>. Use os filtros refinados abaixo para descobrir o perfume que traduz a sua essência.
+      Explore nosso acervo de <strong>300 fragrâncias consagradas</strong>. Refine sua busca e encontre a assinatura olfativa perfeita para cada momento.
     </p>
   </section>
 
-  <!-- Filter Console (Glassmorphism) -->
+  <!-- Filter Console -->
   <section class="filter-console">
     <div class="filter-console-header">
       <div class="console-title">
-        <span class="gold-dot"></span>
-        <h2>Filtros Inteligentes</h2>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--olive-green)" stroke-width="1.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+        <h2>Filtros de Curadoria</h2>
       </div>
-      <button id="resetFiltersBtn" class="btn-reset">Limpar Filtros</button>
+      <button id="resetFiltersBtn" class="btn-reset">Limpar Seleção</button>
     </div>
 
     <div class="active-tags-bar" id="activeTagsBar" style="display: none;">
-      <span class="active-tags-label">Filtros:</span>
+      <span class="active-tags-label">Refinamentos:</span>
       <div class="active-tags-list" id="activeTagsList"></div>
     </div>
 
@@ -155,7 +129,7 @@
 
     <div class="catalog-toolbar">
       <div class="results-info">
-        Exibindo <strong class="counter-highlight" id="resultsCount">300</strong> joias perfumadas
+        Exibindo <strong class="counter-highlight" id="resultsCount">300</strong> essências
       </div>
       <div class="sort-box">
         <label for="sortSelect">Classificar:</label>
@@ -170,10 +144,12 @@
   </section>
 
   <div class="empty-state" id="emptyState" style="display: none;">
-    <div class="empty-icon">✧</div>
+    <div class="empty-icon">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+    </div>
     <h3>Essência não encontrada</h3>
-    <p id="emptyStateMsg">Nenhum perfume atingiu essa combinação exata de exigências.</p>
-    <button class="btn-gold" id="emptyResetBtn">Redefinir Filtros</button>
+    <p id="emptyStateMsg">Nenhum perfume atingiu essa combinação exata de exigências. Tente suavizar seus filtros.</p>
+    <button class="btn-olive" id="emptyResetBtn">Redefinir Curadoria</button>
   </div>
 
   <main class="catalog-container">
@@ -193,6 +169,16 @@
   </div>
 
   <div class="toast" id="toast"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <img src="Monograma D&Co. verde.png" alt="D&Co." class="footer-logo-img" onerror="this.style.display='none';">
+      <div class="footer-title">DUCHI & CO.</div>
+      <p class="footer-copy">Elegante • Moderna • Atemporal</p>
+      <div class="footer-note">Curadoria de Fragrâncias Exclusivas © 2026</div>
+    </div>
+  </footer>
 
   <script src="perfumes.js"></script>
   <script src="app.js"></script>
