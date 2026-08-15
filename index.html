@@ -27,10 +27,10 @@
   <!-- Header -->
   <header class="navbar" id="navbar">
     <div class="nav-brand" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
-      <img src="Logo Duchi & Co. letra branca.png" alt="Duchi & Co." class="nav-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-      <div class="nav-logo-fallback" style="display: none;">
-        <span class="logo-title">DUCHI & CO.</span>
-        <span class="logo-subtitle">CURADORIA DE FRAGRÂNCIAS</span>
+      <img src="Logo Duchi & Co. letra branca.png" alt="Duchi & Co." class="nav-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+      <div class="nav-logo-fallback" style="display: none; flex-direction: column; align-items: center;">
+        <span class="logo-title" style="font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: #EBE5DA; letter-spacing: 2px; line-height: 1.1;">DUCHI & CO.</span>
+        <span class="logo-subtitle" style="font-size: 0.6rem; letter-spacing: 3px; color: #C9A46A; font-weight: 600;">CURADORIA DE FRAGRÂNCIAS</span>
       </div>
     </div>
 
@@ -149,7 +149,7 @@
     </div>
     <h3>Essência não encontrada</h3>
     <p id="emptyStateMsg">Nenhum perfume atingiu essa combinação exata de exigências. Tente suavizar seus filtros.</p>
-    <button class="btn-gold" id="emptyResetBtn">Redefinir Curadoria</button>
+    <button class="btn-olive" id="emptyResetBtn">Redefinir Curadoria</button>
   </div>
 
   <main class="catalog-container">
